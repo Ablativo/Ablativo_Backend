@@ -15,7 +15,7 @@ exports.validateUser = (req, res, next) => {
 
  exports.validateUsername = (req, res, next) => {
   const username = (!!req.body.username) ? validator.trim(req.body.username) : '';
-  if (!email)
+  if (!username)
     res.send({ success: false, status: 500, message: 'USERNAME_REQUIRED' });
   else
     next();

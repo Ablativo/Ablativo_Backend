@@ -72,7 +72,6 @@ function onError(error) {
 	}
 }
 
-const Users = require('../models/user.model');
 
 // EVENT LISTENER SERVER
 function onListening() {

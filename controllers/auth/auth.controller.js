@@ -65,10 +65,8 @@ exports.register = async (req, res) => {
           username: username,
           password: pwd,
         });
-        user.name = req.body.name;
-        user.surname = req.body.surname;
-        user.email = req.body.email;
-        user.completeName = (user.name ? user.name : "") + " " + (user.surname ? user.surname : "");
+        //user.email = req.body.email;
+        
         user.provider = 'local';
 
 
@@ -82,7 +80,7 @@ exports.register = async (req, res) => {
             jwt.sign(userJson, require('../../secret'), { expiresIn: expire }, (error, token) => {
               if (!error) {
                 console.log(req.body.username + ' INFO PARAM OUT:  register : Sign in completed!');
-                res.send({ success: true, status: 200, message: 'Sign in completed!' });
+                res.send({ success: true, status: 200, message: 'Sign in completed!',  token: token });
               }
               else {
                 delete error.op.password;
