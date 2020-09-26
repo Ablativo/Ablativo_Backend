@@ -5,9 +5,10 @@ const passport = require("passport");
 const validator = require("validator");
 const randomstring = require("randomstring");
 const config = require("../../config.js");
-const User = require("../../models/user.model");
+const User = require("../../models/user.model.aws");
 const self = require("../auth/auth.controller");
 const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
 
 exports.checkUsername = (req, res) => {
   try {
@@ -15,24 +16,30 @@ exports.checkUsername = (req, res) => {
     console.log("INFO PARAM IN: checkUsername : " + req.body.username);
     var username = req.body.username;
 
-    User.findOne({ username: username }).then((user) => {
-      if (user == undefined) {
-        console.log("DEBUG END: checkUsername " + req.body.username + " available");
-        res.send({
-          success: true,
-          status: 200,
-          message: "Username available",
-        });
-      } else {
-        console.log("DEBUG END: checkUsername " + req.body.username + " not available");
+    User.query("username")
+      .eq(username)
+      .exec((err, usr) => {
+        if (usr.count == 0 || usr == undefined) {
+          console.log(
+            "DEBUG END: checkUsername " + req.body.username + " available"
+          );
+          res.send({
+            success: true,
+            status: 200,
+            message: "Username available",
+          });
+        } else {
+          console.log(
+            "DEBUG END: checkUsername " + req.body.username + " not available"
+          );
 
-        res.send({
-          success: false,
-          status: 401,
-          message: "Username not available",
-        });
-      }
-    });
+          res.send({
+            success: true,
+            status: 401,
+            message: "Username not available",
+          });
+        }
+      });
   } catch (error) {
     console.error("CATCH checkUsername  : " + error + " " + req.body.username);
     return res.status(401).json(error.message);
@@ -103,73 +110,83 @@ exports.register = async (req, res) => {
     var username = req.body.username;
     var mentor = req.body.mentor;
 
-    console.log(mentor);
 
     var saltRounds = 10;
+    User.query("username")
+      .eq(username)
+      .exec((err, usr) => {
+        if (err) {
+          console.error("ERROR: register : " + JSON.stringify(err));
+          res.send({
+            success: false,
+            status: 500,
+            message: "Error on register please try again in some minutes!",
+          });
+        } else {
+          if (usr.count == 0 || usr == undefined) {
+            const pwd = bcrypt.hashSync(req.body.pwd, saltRounds);
+            const _id = uuidv4();
 
-    User.findOne({ username: username }).then((user) => {
-      if (user == undefined) {
-        const pwd = bcrypt.hashSync(req.body.pwd, saltRounds);
+            var user = new User({
+              username: username,
+              password: pwd,
+              mentor: mentor,
+              _id: _id,
+            });
 
-        var user = new User({
-          username: username,
-          password: pwd,
-          mentor: mentor,
-        });
-        //user.email = req.body.email;
-        console.log(user._doc);
-        user.provider = "local";
+            user.provider = "local";
 
-        user.save((err, userSaved) => {
-          if (!err) {
-            user.password = undefined;
-            var expire = 15552000; //6 mesi, config.mailer.registerUser.expire;
+            user.save((err, userSaved) => {
+              if (!err) {
+                user.password = undefined;
+                var expire = 15552000; //6 mesi, config.mailer.registerUser.expire;
 
-            var userJson = { _id: userSaved._id };
+                var userJson = { _id: userSaved._id };
 
-            jwt.sign(
-              userJson,
-              require("../../secret"),
-              { expiresIn: expire },
-              (error, token) => {
-                if (!error) {
-                  console.log(
-                    req.body.username +
-                      " INFO PARAM OUT:  register : Sign in completed!"
-                  );
-                  res.send({
-                    success: true,
-                    status: 200,
-                    message: "Sign in completed!",
-                    token: token,
-                  });
-                } else {
-                  delete error.op.password;
-                  console.log(
-                    req.body.username +
-                      " INFO PARAM OUT:  register : " +
-                      JSON.stringify(error)
-                  );
-                  res.send({ success: false, status: 500, message: error });
-                }
+                jwt.sign(
+                  userJson,
+                  require("../../secret"),
+                  { expiresIn: expire },
+                  (error, token) => {
+                    if (!error) {
+                      console.log(
+                        req.body.username +
+                          " INFO PARAM OUT:  register : Sign in completed!"
+                      );
+                      res.send({
+                        success: true,
+                        status: 200,
+                        message: "Sign in completed!",
+                        token: token,
+                      });
+                    } else {
+                      delete error.op.password;
+                      console.log(
+                        req.body.username +
+                          " INFO PARAM OUT:  register : " +
+                          JSON.stringify(error)
+                      );
+                      res.send({ success: false, status: 500, message: error });
+                    }
+                  }
+                );
+              } else {
+                console.error("ERROR: register : " + JSON.stringify(err));
+                res.send({ success: false, status: 500, message: err });
               }
-            );
+            });
           } else {
-            console.error("ERROR: register : " + JSON.stringify(err));
-            res.send({ success: false, status: 500, message: err });
+            console.log(
+              req.body.username + " INFO PARAM OUT: register : Username taken!"
+            );
+            res.send({
+              success: false,
+              status: 400,
+              message: "Sorry, your username is taken!",
+            });
           }
-        });
-      } else {
-        console.log(
-          req.body.username + " INFO PARAM OUT: register : Username taken!"
-        );
-        res.send({
-          success: false,
-          status: 400,
-          message: "Sorry, your username is taken!",
-        });
-      }
-    });
+        }
+      });
     console.log(req.body.username + " DEBUG END: register ");
   } catch (e) {
     console.error("CATCH: register : " + e);

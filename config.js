@@ -1,7 +1,7 @@
 var exports = (module.exports = {});
 var self = require("./config.js");
 
-exports.DB = {
+/* exports.DB = {
   development: {
     host: "mongodb://localhost/ablativo",
     user: "root",
@@ -12,7 +12,11 @@ exports.DB = {
     user: "",
     pwd: "",
   },
-};
+}; */
+
+exports.AWS_ACCESS_KEY_ID = "ASIA5ZNVAJZIOI6KNVXO"
+exports.AWS_SECRET_ACCESS_KEY = "4ENmYIixh4QEHD0uLaWS7luPdQ7RkCf6FeCC5A/3"
+exports.AWS_REGION = "us-east-1"
 
 var env = process.env.NODE_ENV ? process.env.NODE_ENV : "development";
 

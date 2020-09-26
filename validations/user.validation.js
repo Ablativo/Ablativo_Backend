@@ -1,7 +1,7 @@
 'use strict';
 
 const validator = require('validator');
-const User = require('../models/user.model');
+const User = require("../models/user.model.aws");
 
 exports.validateUser = (req, res, next) => {
   if (!req.body.pwd) {
