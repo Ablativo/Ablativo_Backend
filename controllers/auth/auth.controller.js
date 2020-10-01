@@ -110,7 +110,6 @@ exports.register = async (req, res) => {
     var username = req.body.username;
     var mentor = req.body.mentor;
 
-
     var saltRounds = 10;
     User.query("username")
       .eq(username)
