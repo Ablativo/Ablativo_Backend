@@ -9,10 +9,11 @@ module.exports = function (app) {
  
     app.post('/user/authenticate', auth.authenticate);                 //authenticate user
     app.post('/user/register', validator.validateUser, auth.register); //register user
-    app.post('/user/checkUsername', auth.checkUsername); //check if username is available
-    app.get('/api/user', user.getMyInfo);                               //get own user info
-    
-    //app.post('/api/users/logoutUser', user.logoutUser);                 //logout user
+    app.post('/user/checkUsername', auth.checkUsername);               //check if username is available
+    app.get('/api/user/getMyInfo', user.getMyInfo);                    //get own user info
+    app.get('/api/user/getMyVisit', user.getMyVisits);                 //get own user info
 
+    //app.post('/api/users/logoutUser', user.logoutUser);              //logout user
+                                                                      
    
 };

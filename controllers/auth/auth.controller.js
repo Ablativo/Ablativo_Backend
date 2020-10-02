@@ -170,7 +170,7 @@ exports.register = async (req, res) => {
                   }
                 );
               } else {
-                console.error("ERROR: register : " + JSON.stringify(err));
+                console.error("ERROR: register : " + err);
                 res.send({ success: false, status: 500, message: err });
               }
             });

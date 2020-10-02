@@ -6,11 +6,10 @@ const { v4: uuidv4 } = require("uuid");
 const Schema = dynamoose.Schema;
 
 var VisitSchema = new Schema({
-  _id: {
+  _userID: {
     type: String,
     hashKey: true,
     default: uuidv4(),
-
   },
   museum: {
     type: String,
@@ -25,7 +24,7 @@ var VisitSchema = new Schema({
   musicLink: { type: String },
   createdAt: { type: String },
   image: { type: String },
-  questions: {
+  /* questions: {
     type: "list",
     list: [
       {
@@ -36,7 +35,7 @@ var VisitSchema = new Schema({
         },
       },
     ],
-  },
+  }, */
 });
 
 var Visit = dynamoose.model("Visit", VisitSchema);

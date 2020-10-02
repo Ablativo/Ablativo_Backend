@@ -16,7 +16,7 @@ exports.validateToken =async(req, res, next) => {
 					message: "Effettua nuovamente l'accesso"
 				});
 			} else {
-				console.log('INFO PARAM OUT: validateToken : Validato '+decoded._id +'   '+decoded.email );
+				console.log('INFO PARAM OUT: validateToken : Validato '+decoded._id  );
 				req.decoded = decoded;
 				next();
 			}
