@@ -156,9 +156,35 @@ exports.getRoomByID = (req, res) => {
 exports.createRoom = (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: createRoom");
-    var userId = req.decoded._id;
 
-  
+    const _id = uuidv4();
+    
+
+    var room = new Room({
+      _id: _id,
+      roomName: req.body.roomName,
+      statue: req.body.statue,
+    });
+
+    room.save((err, roomSaved) => {
+      if (!err) {
+            console.log(
+            req.decoded._id +
+              " INFO PARAM OUT: createRoom : " +
+              JSON.stringify(roomSaved, undefined, 4)
+          );
+          res.send({ success: true, status: 200, data: roomSaved});
+        } else {
+          console.error(
+            req.decoded._id +
+              " ERROR: createRoom error > " +
+              JSON.stringify(err)
+          );
+          res.send({ success: false, status: 500, message: err });
+        }
+      });
+    console.log(req.decoded._id + " DEBUG END: createRoom");
+
   } catch (e) {
     console.error(req.decoded._id + " CATCH: createRoom : error > " + e);
     return res.send({ success: false, message: e.message });
@@ -200,9 +226,36 @@ exports.getStatueByID = (req, res) => {
 exports.createStatue = (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: createStatue");
-    var userId = req.decoded._id;
 
-  
+    const _id = uuidv4();
+
+    var statue = new Statue({
+      _id: _id,
+      name: req.body.name,
+      artist: req.body.artist,
+      image: req.body.image,
+      description: req.body.description
+    });
+
+    statue.save((err, statueSaved) => {
+      if (!err) {
+            console.log(
+            req.decoded._id +
+              " INFO PARAM OUT: createStatue : " +
+              JSON.stringify(statueSaved, undefined, 4)
+          );
+          res.send({ success: true, status: 200, data: statueSaved});
+        } else {
+          console.error(
+            req.decoded._id +
+              " ERROR: createStatue error > " +
+              JSON.stringify(err)
+          );
+          res.send({ success: false, status: 500, message: err });
+        }
+      });
+    console.log(req.decoded._id + " DEBUG END: createRoom");
+
   } catch (e) {
     console.error(req.decoded._id + " CATCH: createStatue " + e);
     return res.send({ success: false, message: e.message });
