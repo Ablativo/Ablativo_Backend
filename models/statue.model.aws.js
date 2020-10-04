@@ -23,6 +23,8 @@ var StatueSchema = new Schema({
   artist: { type: String, required: true },
   image: { type: String },
   description: { type: String },
+  upVote: { type: Number, default: 0},
+  downVote: {type: Number, default: 0}
 });
 
 var Statue = dynamoose.model("Statue", StatueSchema);

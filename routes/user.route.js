@@ -10,8 +10,17 @@ module.exports = function (app) {
     app.post('/user/authenticate', auth.authenticate);                 //authenticate user
     app.post('/user/register', validator.validateUser, auth.register); //register user
     app.post('/user/checkUsername', auth.checkUsername);               //check if username is available
+    app.post('/api/user/createVisit', user.createVisit);               //create visit
+    app.post('/api/user/createStatue', user.createStatue);             //create statue
+    app.post('/api/user/createRoom', user.createRoom);                 //create room
+    
+
     app.get('/api/user/getMyInfo', user.getMyInfo);                    //get own user info
-    app.get('/api/user/getMyVisit', user.getMyVisits);                 //get own user info
+    app.get('/api/user/getMyVisit', user.getMyVisits);                 //get own user visits
+    app.get('/api/user/getRoomByID', user.getRoomByID);                //get own room info
+    app.get('/api/user/getStatueByID', user.getStatueByID);            //get own statue info
+
+    
 
     //app.post('/api/users/logoutUser', user.logoutUser);              //logout user
                                                                       
