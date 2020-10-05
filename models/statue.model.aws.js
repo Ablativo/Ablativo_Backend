@@ -12,13 +12,17 @@ var StatueSchema = new Schema({
     default: uuidv4(),
     hashKey: true,
   },
-  name: {
+  roomID: {
     type: String,
     required: true,
     index: {
-      name: "nameIndex",
+      name: "roomIDIndex",
       global: true,
     }, // creates a global secondary index with the name `usernameIndex` and hashKey `username`
+  },
+  name: {
+    type: String,
+    required: true
   },
   artist: { type: String, required: true },
   image: { type: String },

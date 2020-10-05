@@ -16,12 +16,8 @@ var RoomSchema = new Schema({
       global: true,
     }, // creates a global secondary index with the name `usernameIndex` and hashKey `username`
   },
-  statueContained: {
-    type: 'list',
-    data: []
-  },
 });
 
-var Room= dynamoose.model("Room", RoomSchema);
+var Room = dynamoose.model("Room", RoomSchema);
 
 module.exports = Room;

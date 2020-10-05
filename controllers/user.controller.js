@@ -19,7 +19,7 @@ exports.getMyInfo = (req, res) => {
 
     User.query("_id")
       .eq(userId)
-      .attributes(["username", "mentor", "counter"]) 
+      .attributes(["username", "mentor", "counter"])
       .exec((err, user) => {
         if (!err) {
           console.log(
@@ -27,7 +27,7 @@ exports.getMyInfo = (req, res) => {
               " INFO PARAM OUT: getMyInfo : " +
               JSON.stringify(user, undefined, 4)
           );
-          res.send({ success: true, status: 200, data: user});
+          res.send({ success: true, status: 200, data: user });
         } else {
           console.error(
             req.decoded._id +
@@ -58,8 +58,8 @@ exports.getMyVisits = async (req, res) => {
               " INFO PARAM OUT: getMyVisits : " +
               JSON.stringify(visit, undefined, 4)
           );
-          res.send({ success: true, status: 200, data: visit});
-          
+          res.send({ success: true, status: 200, data: visit });
+
           //res.send({ success: true, status: 200, data: visit});
         } else {
           console.error(
@@ -71,7 +71,6 @@ exports.getMyVisits = async (req, res) => {
         }
       });
     console.log(req.decoded._id + " DEBUG END: getMyVisits ");
-
   } catch (e) {
     console.error(req.decoded._id + " CATCH: getMyVisits : visit error > " + e);
     return res.send({ success: false, message: e.message });
@@ -97,21 +96,21 @@ exports.createVisit = (req, res) => {
 
     visit.save((err, visitSaved) => {
       if (!err) {
-            console.log(
-            req.decoded._id +
-              " INFO PARAM OUT: createVisit : " +
-              JSON.stringify(visitSaved, undefined, 4)
-          );
-          res.send({ success: true, status: 200, data: visitSaved});
-        } else {
-          console.error(
-            req.decoded._id +
-              " ERROR: createVisit : visit error > " +
-              JSON.stringify(err)
-          );
-          res.send({ success: false, status: 500, message: err });
-        }
-      });
+        console.log(
+          req.decoded._id +
+            " INFO PARAM OUT: createVisit : " +
+            JSON.stringify(visitSaved, undefined, 4)
+        );
+        res.send({ success: true, status: 200, data: visitSaved });
+      } else {
+        console.error(
+          req.decoded._id +
+            " ERROR: createVisit : visit error > " +
+            JSON.stringify(err)
+        );
+        res.send({ success: false, status: 500, message: err });
+      }
+    });
     console.log(req.decoded._id + " DEBUG END: createVisit");
   } catch (e) {
     console.error(req.decoded._id + " CATCH: createVisit : user error > " + e);
@@ -119,72 +118,83 @@ exports.createVisit = (req, res) => {
   }
 };
 
-//TODO
-
 exports.getRoomByID = (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: getRoomByID");
-    
+
     var roomID = req.body.roomID;
 
     Room.query("_id")
-    .eq(roomID)
-    .exec((err, room) => {
-      if (!err) {
-        console.log(
-          req.decoded._id +
-            " INFO PARAM OUT: getRoomByID : " +
-            JSON.stringify(room, undefined, 4)
-        );
-        res.send({ success: true, status: 200, data: room});
-     } else {
-        console.error(
-          req.decoded._id +
-            " ERROR: getRoomByID  error > " +
-            JSON.stringify(err)
-        );
-        res.send({ success: false, message: err });
-      }
-    });
-  
+      .eq(roomID)
+      .exec((err, room) => {
+        if (!err) {
+          Statue.query("roomID")
+            .eq(roomID)
+            .exec((err, statue) => {
+              if (!err) {
+                var statueContained = [];
+                statue.filter((item) => statueContained.push(item));
+                var ret = { room, statueContained };
+                console.log(
+                  req.decoded._id +
+                    " INFO PARAM OUT: getRoomByID : " +
+                    JSON.stringify(room, undefined, 4)
+                );
+                res.send({
+                  success: true,
+                  status: 200,
+                  data: ret,
+                });
+              } else {
+                console.error(
+                  req.decoded._id +
+                    " ERROR: getRoomByID  error on find statue> " +
+                    err
+                );
+                res.send({ success: false, message: err });
+              }
+            });
+        } else {
+          console.error(
+            req.decoded._id +
+              " ERROR: getRoomByID  error > " +
+              JSON.stringify(err)
+          );
+          res.send({ success: false, message: err });
+        }
+      });
   } catch (e) {
     console.error(req.decoded._id + " CATCH: getRoomByID : error > " + e);
     return res.send({ success: false, message: e.message });
   }
 };
 
-exports.createRoom = (req, res) => {
+//ONLY DASHBOARD USERS
+exports.createRoom = async (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: createRoom");
 
     const _id = uuidv4();
-    
 
     var room = new Room({
       _id: _id,
       roomName: req.body.roomName,
-      statue: req.body.statue,
     });
 
-    room.save((err, roomSaved) => {
+    await room.save((err, roomSaved) => {
       if (!err) {
-            console.log(
-            req.decoded._id +
-              " INFO PARAM OUT: createRoom : " +
-              JSON.stringify(roomSaved, undefined, 4)
-          );
-          res.send({ success: true, status: 200, data: roomSaved});
-        } else {
-          console.error(
-            req.decoded._id +
-              " ERROR: createRoom error > " +
-              JSON.stringify(err)
-          );
-          res.send({ success: false, status: 500, message: err });
-        }
-      });
-    console.log(req.decoded._id + " DEBUG END: createRoom");
-
+        console.log(
+          req.decoded._id +
+            " INFO PARAM OUT: createRoom : " +
+            JSON.stringify(roomSaved, undefined, 4)
+        );
+        console.log(req.decoded._id + " DEBUG END: createRoom");
+        res.send({ success: true, status: 200, data: roomSaved });
+      } else {
+        console.error(req.decoded._id + " ERROR: createRoom error > " + err);
+        res.send({ success: false, status: 500, message: err });
+      }
+    });
   } catch (e) {
     console.error(req.decoded._id + " CATCH: createRoom : error > " + e);
     return res.send({ success: false, message: e.message });
@@ -197,35 +207,38 @@ exports.getStatueByID = (req, res) => {
     var statueID = req.decoded._id;
 
     Statue.query("statueID")
-    .eq(statueID)
-    .exec((err, statue) => {
-      if (!err) {
-        console.log(
-          req.decoded._id +
-            " INFO PARAM OUT: getStatueByID : " +
-            JSON.stringify(statue, undefined, 4)
-        );
-        res.send({ success: true, status: 200, data: statue});
-     } else {
-        console.error(
-          req.decoded._id +
-            " ERROR: getStatueByID  error > " +
-            JSON.stringify(err)
-        );
-        res.send({ success: false, message: err });
-      }
-    });
-  
-  
+      .eq(statueID)
+      .exec((err, statue) => {
+        if (!err) {
+          console.log(
+            req.decoded._id +
+              " INFO PARAM OUT: getStatueByID : " +
+              JSON.stringify(statue, undefined, 4)
+          );
+          res.send({ success: true, status: 200, data: statue });
+        } else {
+          console.error(
+            req.decoded._id +
+              " ERROR: getStatueByID  error > " +
+              JSON.stringify(err)
+          );
+          res.send({ success: false, message: err });
+        }
+      });
   } catch (e) {
     console.error(req.decoded._id + " CATCH: getStatueByID : error > " + e);
     return res.send({ success: false, message: e.message });
   }
 };
 
-exports.createStatue = (req, res) => {
+//ONLY DASHBOARD USERS
+exports.createStatue = async (req, res) => {
   try {
-    console.log(req.decoded._id + " DEBUG START: createStatue");
+    console.log(
+      req.decoded._id +
+        " DEBUG START: createStatue " +
+        JSON.stringify(req.body, undefined, 4)
+    );
 
     const _id = uuidv4();
 
@@ -234,35 +247,33 @@ exports.createStatue = (req, res) => {
       name: req.body.name,
       artist: req.body.artist,
       image: req.body.image,
-      description: req.body.description
+      description: req.body.description,
+      roomID: req.body.roomID,
     });
-
-    statue.save((err, statueSaved) => {
+    //roomID,
+    await statue.save((err, statueSaved) => {
       if (!err) {
-            console.log(
-            req.decoded._id +
-              " INFO PARAM OUT: createStatue : " +
-              JSON.stringify(statueSaved, undefined, 4)
-          );
-          res.send({ success: true, status: 200, data: statueSaved});
-        } else {
-          console.error(
-            req.decoded._id +
-              " ERROR: createStatue error > " +
-              JSON.stringify(err)
-          );
-          res.send({ success: false, status: 500, message: err });
-        }
-      });
-    console.log(req.decoded._id + " DEBUG END: createRoom");
-
+        console.log(
+          req.decoded._id +
+            " INFO PARAM OUT: createStatue : " +
+            JSON.stringify(statueSaved, undefined, 4)
+        );
+        res.send({ success: true, status: 200, data: statueSaved });
+      } else {
+        console.error(
+          req.decoded._id +
+            " ERROR: createStatue error > " +
+            JSON.stringify(err)
+        );
+        res.send({ success: false, status: 500, message: err });
+      }
+    });
   } catch (e) {
     console.error(req.decoded._id + " CATCH: createStatue " + e);
     return res.send({ success: false, message: e.message });
   }
 };
 
-
-
+//TODO
 
 //logoutUser
