@@ -131,54 +131,19 @@ exports.getRoomByID = async (req, res) => {
             " INFO PARAM OUT: getRoomByID : " +
             JSON.stringify(result, undefined, 4)
         );
-        console.log(result.artworks);
         res.send({
           success: true,
           status: 200,
           data: result,
         });
-        console.log(
-          `Operation completed successfully: ${JSON.stringify(result)}`
-        );
       } else {
-        console.log(`An error occurred: ${error}`);
+        console.error(
+          req.decoded._id + " ERROR: getRoomByID  error on find artwork> " + err
+        );
+        res.send({ success: false, status: 404, message: err });
       }
     });
-    /*  Artwork.query("roomID")
-            .eq(roomID)
-            .exec((err, artwork) => {
-              if (!err) {
-                var artworkContained = [];
-                artwork.filter((item) => artworkContained.push(item));
-                var ret = { room, artworkContained };
-                console.log(
-                  req.decoded._id +
-                    " INFO PARAM OUT: getRoomByID : " +
-                    JSON.stringify(room, undefined, 4)
-                );
-                res.send({
-                  success: true,
-                  status: 200,
-                  data: ret,
-                });
-              } else {
-                console.error(
-                  req.decoded._id +
-                    " ERROR: getRoomByID  error on find artwork> " +
-                    err
-                );
-                res.send({ success: false, message: err });
-              }
-            }); 
-        } else {
-          console.error(
-            req.decoded._id +
-              " ERROR: getRoomByID  error > " +
-              JSON.stringify(err)
-          );
-          res.send({ success: false, message: err });
-        }
-      });*/
+    
   } catch (e) {
     console.error(req.decoded._id + " CATCH: getRoomByID : error > " + e);
     return res.send({ success: false, message: e.message });
