@@ -11,12 +11,7 @@ var ChatSchema = new Schema({
   text: {
     type: String,
   },
-  password: { type: String, required: true },
-  mentor: {
-    type: String,
-    enum: ["AUGUSTO", "CESARE", "NERONE"],
-    default: "AUGUSTO",
-  },
+
 });
 
 var Chat = dynamoose.model("Chat", ChatSchema);

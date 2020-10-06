@@ -16,12 +16,7 @@ var ChatListSchema = new Schema({
       global: true,
     }, // creates a global secondary index with the name `usernameIndex` and hashKey `username`
   },
-  password: { type: String, required: true },
-  mentor: {
-    type: String,
-    enum: ["AUGUSTO", "CESARE", "NERONE"],
-    default: "AUGUSTO",
-  },
+  
 });
 
 var ChatList = dynamoose.model("ChatList", ChatListSchema);

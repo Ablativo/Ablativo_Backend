@@ -1,7 +1,7 @@
 const User = require("../models/user.model.aws");
 const Visit = require("../models/visit.model.aws");
 const Room = require("../models/room.model.aws");
-const Statue = require("../models/statue.model.aws");
+const Artwork = require("../models/artwork.model.aws");
 
 var config = require("../config.js");
 const jwt = require("jsonwebtoken");
@@ -118,23 +118,39 @@ exports.createVisit = (req, res) => {
   }
 };
 
-exports.getRoomByID = (req, res) => {
+exports.getRoomByID = async (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: getRoomByID");
 
     var roomID = req.body.roomID;
 
-    Room.query("_id")
-      .eq(roomID)
-      .exec((err, room) => {
-        if (!err) {
-          Statue.query("roomID")
+    await Room.get(roomID, function (error, result) {
+      if (!error) {
+        console.log(
+          req.decoded._id +
+            " INFO PARAM OUT: getRoomByID : " +
+            JSON.stringify(result, undefined, 4)
+        );
+        console.log(result.artworks);
+        res.send({
+          success: true,
+          status: 200,
+          data: result,
+        });
+        console.log(
+          `Operation completed successfully: ${JSON.stringify(result)}`
+        );
+      } else {
+        console.log(`An error occurred: ${error}`);
+      }
+    });
+    /*  Artwork.query("roomID")
             .eq(roomID)
-            .exec((err, statue) => {
+            .exec((err, artwork) => {
               if (!err) {
-                var statueContained = [];
-                statue.filter((item) => statueContained.push(item));
-                var ret = { room, statueContained };
+                var artworkContained = [];
+                artwork.filter((item) => artworkContained.push(item));
+                var ret = { room, artworkContained };
                 console.log(
                   req.decoded._id +
                     " INFO PARAM OUT: getRoomByID : " +
@@ -148,12 +164,12 @@ exports.getRoomByID = (req, res) => {
               } else {
                 console.error(
                   req.decoded._id +
-                    " ERROR: getRoomByID  error on find statue> " +
+                    " ERROR: getRoomByID  error on find artwork> " +
                     err
                 );
                 res.send({ success: false, message: err });
               }
-            });
+            }); 
         } else {
           console.error(
             req.decoded._id +
@@ -162,7 +178,7 @@ exports.getRoomByID = (req, res) => {
           );
           res.send({ success: false, message: err });
         }
-      });
+      });*/
   } catch (e) {
     console.error(req.decoded._id + " CATCH: getRoomByID : error > " + e);
     return res.send({ success: false, message: e.message });
@@ -201,75 +217,99 @@ exports.createRoom = async (req, res) => {
   }
 };
 
-exports.getStatueByID = (req, res) => {
+exports.getArtworkByID = (req, res) => {
   try {
-    console.log(req.decoded._id + " DEBUG START: getStatueByID");
-    var statueID = req.decoded._id;
+    console.log(req.decoded._id + " DEBUG START: getArtworkByID");
+    var artworkID = req.body.artworkID;
 
-    Statue.query("statueID")
-      .eq(statueID)
-      .exec((err, statue) => {
+    Artwork.query("artworkID")
+      .eq(artworkID)
+      .exec((err, artwork) => {
         if (!err) {
           console.log(
             req.decoded._id +
-              " INFO PARAM OUT: getStatueByID : " +
-              JSON.stringify(statue, undefined, 4)
+              " INFO PARAM OUT: getArtworkByID : " +
+              JSON.stringify(artwork, undefined, 4)
           );
-          res.send({ success: true, status: 200, data: statue });
+          res.send({ success: true, status: 200, data: artwork });
         } else {
           console.error(
             req.decoded._id +
-              " ERROR: getStatueByID  error > " +
+              " ERROR: getArtworkByID  error > " +
               JSON.stringify(err)
           );
           res.send({ success: false, message: err });
         }
       });
   } catch (e) {
-    console.error(req.decoded._id + " CATCH: getStatueByID : error > " + e);
+    console.error(req.decoded._id + " CATCH: getArtworkByID : error > " + e);
     return res.send({ success: false, message: e.message });
   }
 };
 
 //ONLY DASHBOARD USERS
-exports.createStatue = async (req, res) => {
+exports.createArtwork = async (req, res) => {
   try {
     console.log(
       req.decoded._id +
-        " DEBUG START: createStatue " +
+        " DEBUG START: createArtwork " +
         JSON.stringify(req.body, undefined, 4)
     );
 
     const _id = uuidv4();
+    const room = await Room.get(req.body.roomID);
+    var artworkContained = room.artworks;
 
-    var statue = new Statue({
+    var artwork = new Artwork({
       _id: _id,
       name: req.body.name,
       artist: req.body.artist,
       image: req.body.image,
       description: req.body.description,
-      roomID: req.body.roomID,
     });
     //roomID,
-    await statue.save((err, statueSaved) => {
+
+    await artwork.save((err, artworkSaved) => {
       if (!err) {
-        console.log(
-          req.decoded._id +
-            " INFO PARAM OUT: createStatue : " +
-            JSON.stringify(statueSaved, undefined, 4)
+        artworkContained == undefined
+          ? (artworkContained = [artworkSaved])
+          : (artworkContained = [...artworkContained, artworkSaved]);
+
+        Room.update(
+          {
+            _id: req.body.roomID,
+            artworks: artworkContained,
+          },
+          (error, room) => {
+            if (error) {
+              console.error(
+                req.decoded._id +
+                  " ERROR: createArtwork on update room error > " +
+                  err
+              );
+              res.send({ success: false, status: 500, message: err });
+            } else {
+              console.log(
+                req.decoded._id +
+                  " INFO PARAM OUT: createArtwork : " +
+                  JSON.stringify(artworkContained, undefined, 4)
+              );
+              /* console.log(
+                req.decoded._id +
+                  " INFO PARAM OUT: createArtwork roomUpdated : " +
+                  JSON.stringify(room, undefined, 4)
+              ); */
+              res.send({ success: true, status: 200, data: artworkSaved });
+            }
+          }
         );
-        res.send({ success: true, status: 200, data: statueSaved });
       } else {
-        console.error(
-          req.decoded._id +
-            " ERROR: createStatue error > " +
-            JSON.stringify(err)
-        );
+        console.error(req.decoded._id + " ERROR: createArtwork error > " + err);
         res.send({ success: false, status: 500, message: err });
       }
     });
   } catch (e) {
-    console.error(req.decoded._id + " CATCH: createStatue " + e);
+    console.error(req.decoded._id + " CATCH: createArtwork " + e);
     return res.send({ success: false, message: e.message });
   }
 };

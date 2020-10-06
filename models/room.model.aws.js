@@ -2,6 +2,7 @@
 
 const dynamoose = require("dynamoose");
 const Schema = dynamoose.Schema;
+const Artwork = require("./artwork.model.aws");
 
 var RoomSchema = new Schema({
   _id: {
@@ -15,6 +16,10 @@ var RoomSchema = new Schema({
       name: "roomnameIndex",
       global: true,
     }, // creates a global secondary index with the name `usernameIndex` and hashKey `username`
+  },
+  artworks: {
+    type: Array,
+    schema: [Artwork]
   },
 });
 
