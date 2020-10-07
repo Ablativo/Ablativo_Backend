@@ -24,9 +24,9 @@ var ArtworkSchema = new Schema({
   artist: { type: String, required: true },
   image: { type: String },
   description: { type: String },
-  upVote: { type: Number, default: 0},
-  downVote: {type: Number, default: 0},
-
+  upVote: { type: Number, default: 0 },
+  downVote: { type: Number, default: 0 },
+  initialMessage: { type: String },
 });
 
 var Artwork = dynamoose.model("Artwork", ArtworkSchema);

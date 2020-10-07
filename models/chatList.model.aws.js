@@ -2,24 +2,39 @@
 
 const dynamoose = require("dynamoose");
 const Schema = dynamoose.Schema;
+const ChatMessage = require("./chatMessage.model.aws");
 
 var ChatListSchema = new Schema({
   _id: {
     type: String,
     hashKey: true,
   },
-  username: {
+  _userID: {
     type: String,
-    required: true, 
+    required: true,
     index: {
-      name: "usernameIndex",
+      name: "mentornameIndex",
       global: true,
     }, // creates a global secondary index with the name `usernameIndex` and hashKey `username`
   },
-  
+  artworkName: {
+    type: String,
+    required: true,
+  },
+  artworkAvatar: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: String,
+    required: true,
+  },
+  messages: {
+    type: Array,
+    schema: [ChatMessage],
+  },
 });
 
 var ChatList = dynamoose.model("ChatList", ChatListSchema);
-
 
 module.exports = ChatList;

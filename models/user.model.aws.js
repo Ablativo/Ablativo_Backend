@@ -21,8 +21,8 @@ var UserSchema = new Schema({
   },
   password: { type: String, required: true },
   counter: {
-    type: String,
-    list: {
+    type: Object,
+    schema: {
       question: {
         type: Number,
         default: 0,

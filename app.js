@@ -13,6 +13,7 @@ const bcrypt = require("bcrypt");
 // Routes
 var authorization = require("./controllers/auth/authorization.middleware.js");
 const userRoute = require("./routes/user.route");
+const chatRoute = require("./routes/chat.route");
 
 // App
 (app = express()), (port = process.env.PORT || 3000);
@@ -105,6 +106,7 @@ passport.deserializeUser(function (id, done) {
 
 app.use("/api", authorization.validateToken); //tutte le chiamate che usano /api saranno validate.
 userRoute(app); //register the route
+chatRoute(app);
 
 app.all("*", (req, res) => {
   //le restanti chiamate che non sono state mappate rintornano 404
