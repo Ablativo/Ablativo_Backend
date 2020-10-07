@@ -122,14 +122,15 @@ exports.getRoomByID = async (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: getRoomByID");
 
-    var roomID = req.body.roomID;
+    var roomID = req.query.roomID;
+    console.log(roomID);
 
     await Room.get(roomID, function (error, result) {
       if (!error) {
         console.log(
           req.decoded._id +
             " INFO PARAM OUT: getRoomByID : " +
-            JSON.stringify(result, undefined, 4)
+            JSON.stringify(result, undefined, 1)
         );
         res.send({
           success: true,
