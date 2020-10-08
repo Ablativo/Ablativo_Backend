@@ -3,11 +3,16 @@
 const dynamoose = require("dynamoose");
 const Schema = dynamoose.Schema;
 const Artwork = require("./artwork.model.aws");
+const Device = require("./device.model.aws");
 
 var RoomSchema = new Schema({
   _id: {
     type: String,
     hashKey: true,
+  },
+  device: {
+    type: Device,
+    required: true,
   },
   roomName: {
     type: String,
