@@ -104,3 +104,75 @@ exports.createChat = (req, res) => {
     return res.send({ status: 500, success: false, message: e.message });
   }
 };
+
+exports.sendMessage = (req, res) => {
+  try {
+    console.log(req.decoded._id + " DEBUG START: sendMessage");
+    var userID = req.decoded._id;
+    var artworkID = req.body.artworkID;
+    var artworkAvatar = req.body.artworkAvatar;
+    var artworkName = req.body.artworkName;
+
+    var chatID = userID + "_" + artworkID;
+
+    var message = new ChatMessage({
+      id: uuidv4(),
+      user: {
+        id: artworkID,
+        name: artworkName,
+        avatar: artworkAvatar,
+      },
+      text: req.body.message,
+      createdAt: Date.now().toString(),
+    });
+    var chat = ChatList.get(chatID);
+
+    message.save((err, messageSaved) => {
+      if (!err) {
+        console.log(
+          req.decoded._id +
+            " INFO PARAM OUT: createChat : " +
+            JSON.stringify(messageSaved, undefined, 4)
+        );
+        var messages =
+          chat.messages == undefined
+            ? [messageSaved]
+            : [...chat.messages, messageSaved];
+
+        ChatList.update(
+          {
+            _id: chatID,
+            messages: messages,
+          },
+          (error, chatSaved) => {
+            if (error) {
+              console.error(
+                req.decoded._id +
+                  " ERROR: sendMessage on update room error > " +
+                  err
+              );
+              res.send({ success: false, status: 500, message: err });
+            } else {
+              console.log(
+                req.decoded._id +
+                  " INFO PARAM OUT: sendMessage : " +
+                  JSON.stringify(chatSaved, undefined, 4)
+              );
+              res.send({ success: true, status: 200, data: chatSaved });
+            }
+          }
+        );
+      } else {
+        console.error(
+          req.decoded._id + " ERROR: sendMessage : message error > " + err
+        );
+        res.send({ success: false, status: 500, message: err });
+      }
+    });
+
+    console.log(req.decoded._id + " DEBUG END: sendMessage");
+  } catch (e) {
+    console.error(req.decoded._id + " CATCH: sendMessage : chat error > " + e);
+    return res.send({ status: 500, success: false, message: e.message });
+  }
+};
