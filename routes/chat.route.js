@@ -1,4 +1,3 @@
-const User = require("../models/user.model.aws");
 const config = require('../config.js');
 
 module.exports = function (app) {

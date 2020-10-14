@@ -8,21 +8,21 @@ exports.validateToken =async(req, res, next) => {
  	if (token) {
 		jwt.verify(token, require('../../secret'), (err, decoded) => {
 			if (err || !decoded) {
-				console.log("INFO PARAM OUT: validateToken : Effettua nuovamente l'accesso, Token non validato o incorretto "+token );
+				console.log("INFO PARAM OUT: validateToken : Try again the access, not valid or incorrect Token"+token );
 				res.send({
 					success: false,
 					status: 401,
 					tokenExpired: true,
-					message: "Effettua nuovamente l'accesso"
+					message: "Try again the access"
 				});
 			} else {
-				console.log('INFO PARAM OUT: validateToken : Validato '+decoded._id  );
+				console.log('INFO PARAM OUT: validateToken : Validated '+decoded._id  );
 				req.decoded = decoded;
 				next();
 			}
 		});
 	} else {
-		console.log('INFO PARAM OUT: validateToken : User not Authenticated, manca il token');
+		console.log('INFO PARAM OUT: validateToken : User not Authenticated, missing token');
 
 		res.send({
 			success: false,
