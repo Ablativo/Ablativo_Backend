@@ -7,13 +7,15 @@ const User = require("./models/user.model.aws");
 const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-var config = require("./config.js");
 const bcrypt = require("bcrypt");
+var config = require("./config.js");
+
 
 // Routes
 var authorization = require("./controllers/auth/authorization.middleware.js");
 const userRoute = require("./routes/user.route");
 const chatRoute = require("./routes/chat.route");
+const roomRoute = require("./routes/room.route");
 
 // App
 (app = express()), (port = process.env.PORT || 3000);
@@ -91,7 +93,6 @@ passport.use(
 );
 
 passport.serializeUser(function (user, done) {
-
   Object.assign({}, { x: user._id, y: user.username });
   done(null, user._id);
 });
@@ -104,12 +105,13 @@ passport.deserializeUser(function (id, done) {
     });
 });
 
-app.use("/api", authorization.validateToken); //tutte le chiamate che usano /api saranno validate.
+app.use("/api", authorization.validateToken); //all /api requests must be valitadated 
 userRoute(app); //register the route
 chatRoute(app);
+roomRoute(app);
 
 app.all("*", (req, res) => {
-  //le restanti chiamate che non sono state mappate rintornano 404
+  //wrong requests are mapped on 404
   res.send({
     success: false,
     status: 404,
