@@ -105,14 +105,13 @@ exports.createChat = (req, res) => {
   }
 };
 
-exports.sendMessage = (req, res) => {
+exports.sendMessage = async (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: sendMessage");
     var userID = req.decoded._id;
     var artworkID = req.body.artworkID;
     var artworkAvatar = req.body.artworkAvatar;
     var artworkName = req.body.artworkName;
-
     var chatID = userID + "_" + artworkID;
 
     var message = new ChatMessage({
@@ -125,19 +124,23 @@ exports.sendMessage = (req, res) => {
       text: req.body.message,
       createdAt: Date.now().toString(),
     });
-    var chat = ChatList.get(chatID);
 
-    message.save((err, messageSaved) => {
+    var chat = await ChatList.get(chatID);
+
+    var lastMessages = [];
+    
+    chat.messages.filter((item) => lastMessages.push(item.id));
+    
+    var messages =
+      lastMessages == undefined ? [message.id] : [...lastMessages, message.id];
+
+    await message.save((err, messageSaved) => {
       if (!err) {
         console.log(
           req.decoded._id +
-            " INFO PARAM OUT: createChat : " +
+            " INFO PARAM OUT: sendMessage : " +
             JSON.stringify(messageSaved, undefined, 4)
         );
-        var messages =
-          chat.messages == undefined
-            ? [messageSaved]
-            : [...chat.messages, messageSaved];
 
         ChatList.update(
           {
@@ -148,8 +151,8 @@ exports.sendMessage = (req, res) => {
             if (error) {
               console.error(
                 req.decoded._id +
-                  " ERROR: sendMessage on update room error > " +
-                  err
+                  " ERROR: sendMessage on update chatList error > " +
+                  error
               );
               res.send({ success: false, status: 500, message: err });
             } else {
