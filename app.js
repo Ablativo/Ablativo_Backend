@@ -8,6 +8,8 @@ const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
+var AWS = require('aws-sdk');
+AWS.config.update({region:'us-east-1'});
 var config = require("./config.js");
 
 
@@ -18,7 +20,7 @@ const chatRoute = require("./routes/chat.route");
 const roomRoute = require("./routes/room.route");
 
 // App
-(app = express()), (port = process.env.PORT || 3000);
+(app = express()), (port = process.env.PORT || 8888);
 app.listen(port);
 
 app.use("/validate", express.static(path.join(__dirname, "static", "public")));
