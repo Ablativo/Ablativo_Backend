@@ -1,6 +1,8 @@
 const User = require("../models/user.model.aws");
 const Visit = require("../models/visit.model.aws");
 const Artwork = require("../models/artwork.model.aws");
+const Room = require("../models/room.model.aws");
+
 const ChatMessage = require("../models/chatMessage.model.aws");
 const ChatList = require("../models/chatList.model.aws");
 
@@ -16,18 +18,56 @@ exports.getChatList = async (req, res) => {
 
     await ChatList.query("_userID")
       .eq(userID)
-      .exec((err, chat) => {
+      .exec(async (err, chat) => {
         if (!err) {
           console.log(
             req.decoded._id +
-              " INFO PARAM OUT: createChat : " +
+              " INFO PARAM OUT: getChatList : " +
               JSON.stringify(chat, undefined, 4)
           );
-          res.send({ success: true, status: 200, data: chat });
+          if (chat.count == 0) {
+            console.log("DEBUG: getChatList : "+ req.query.roomID);
+            await Room.get(req.query.roomID, (err, result) => {
+              if (!err) {
+                console.log(result);
+                var chatAvailable = [];
+                var chatElement= {};
+                result.artworks.map((item, index) => {
+                  chatElement = {
+                    id: index,
+                    username: item.name,
+                    message: item.initialMessage
+                      ? item.initialMessage
+                      : "Benvenuto al museo di arte classica!",
+                    avatar: item.image,
+                    isRead: false,
+                    date: Date.now(),
+                  };
+                  chatAvailable.push(chatElement);
+                });
+
+                res.send({ success: true, status: 200, data: chatAvailable });
+              } else {
+                console.error(
+                  req.decoded._id + " ERROR: createChat : chat error > " + err
+                );
+              }
+            });
+          } else {
+            console.error(
+              req.decoded._id + " DEBUG: createChat : chat  > " + chat
+            );
+            return res.send({
+              status: 200,
+              success: false,
+              message: chat,
+            });
+          }
         } else {
           console.error(
             req.decoded._id + " ERROR: createChat : chat error > " + err
           );
+          return res.send({ status: 500, success: false, message: e.message });
         }
       });
   } catch (e) {
@@ -128,9 +168,9 @@ exports.sendMessage = async (req, res) => {
     var chat = await ChatList.get(chatID);
 
     var lastMessages = [];
-    
+
     chat.messages.filter((item) => lastMessages.push(item.id));
-    
+
     var messages =
       lastMessages == undefined ? [message.id] : [...lastMessages, message.id];
 
