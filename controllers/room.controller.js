@@ -37,15 +37,18 @@ exports.getRoomList = async (req, res) => {
 
 exports.getRoomByID = async (req, res) => {
   try {
-    console.log(req.decoded._id + " DEBUG START: getRoomByID");
+    console.log(" DEBUG START: getRoomByID " );
+    var roomID = req.query.roomID;
 
-    var roomID = req.body.roomID;
+    console.log(
+      " INFO PARAM IN: getRoomByID : " +
+        JSON.stringify(roomID, undefined, 4)
+    );
 
     await Room.get(roomID, function (error, result) {
       if (!error) {
         console.log(
-          req.decoded._id +
-            " INFO PARAM OUT: getRoomByID : " +
+          " INFO PARAM OUT: getRoomByID : " +
             JSON.stringify(result, undefined, 4)
         );
         res.send({
@@ -54,14 +57,12 @@ exports.getRoomByID = async (req, res) => {
           data: result,
         });
       } else {
-        console.error(
-          req.decoded._id + " ERROR: getRoomByID  error on find artwork> " + err
-        );
-        res.send({ success: false, status: 404, message: err });
+        console.error(" ERROR: getRoomByID  error on find artwork> " + error);
+        res.send({ success: false, status: 404, message: error });
       }
     });
   } catch (e) {
-    console.error(req.decoded._id + " CATCH: getRoomByID : error > " + e);
+    console.error(" CATCH: getRoomByID : error > " + e);
     return res.send({ success: false, message: e.message });
   }
 };
@@ -131,14 +132,12 @@ exports.createRoom = async (req, res) => {
 exports.createArtwork = async (req, res) => {
   try {
     console.log(
-      req.decoded._id +
-        " DEBUG START: createArtwork " +
-        JSON.stringify(req.body, undefined, 4)
+      " DEBUG START: createArtwork " + JSON.stringify(req.body, undefined, 4)
     );
 
     const _id = uuidv4();
     const room = await Room.get(req.body.roomID);
-    var artworkContained = room.artworks;
+    var artworkContained = room.artworks ? room.artworks : [];
 
     var artwork = new Artwork({
       _id: _id,
@@ -150,27 +149,27 @@ exports.createArtwork = async (req, res) => {
 
     await artwork.save((err, artworkSaved) => {
       if (!err) {
-        artworkContained == undefined
-          ? (artworkContained = [artworkSaved])
-          : (artworkContained = [...artworkContained, artworkSaved]);
+        var artworks = [];
+
+        if (artworkContained != undefined)
+          artworkContained.filter((item) => artworks.push(item._id));
+
+        artworks.push(artworkSaved);
 
         Room.update(
           {
             _id: req.body.roomID,
-            artworks: artworkContained,
+            artworks: artworks,
           },
           (error, room) => {
             if (error) {
               console.error(
-                req.decoded._id +
-                  " ERROR: createArtwork on update room error > " +
-                  err
+                " ERROR: createArtwork on update room error > " + err
               );
               res.send({ success: false, status: 500, message: err });
             } else {
               console.log(
-                req.decoded._id +
-                  " INFO PARAM OUT: createArtwork : " +
+                " INFO PARAM OUT: createArtwork : " +
                   JSON.stringify(artworkContained, undefined, 4)
               );
               /* console.log(
@@ -183,7 +182,7 @@ exports.createArtwork = async (req, res) => {
           }
         );
       } else {
-        console.error(req.decoded._id + " ERROR: createArtwork error > " + err);
+        console.error(" ERROR: createArtwork error > " + err);
         res.send({ success: false, status: 500, message: err });
       }
     });
