@@ -14,6 +14,13 @@ var RoomSchema = new Schema({
     type: Device,
     required: true,
   },
+  image: {
+    type: String 
+  },
+  upVote: {
+    type: Number,
+    default: 0
+  },
   roomName: {
     type: String,
     required: true,
