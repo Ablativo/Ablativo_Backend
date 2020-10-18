@@ -14,8 +14,8 @@ var self = require("./config.js");
   },
 }; */
 
-exports.AWS_ACCESS_KEY_ID = "ASIAZHIAWT23IDEUOC4Z"
-exports.AWS_SECRET_ACCESS_KEY = "O0CMl1B85d5xttcOLFHPRaC9BgesPZjTfF/1uBlm"
+exports.AWS_ACCESS_KEY_ID = "ASIAZHIAWT23KUCBM6R6"
+exports.AWS_SECRET_ACCESS_KEY = "JHfE6M/WXYm6S/qymFfB/tQAwGNZUFO1zsNtZTJd"
 exports.AWS_REGION = "us-east-1"
 
 var env = process.env.NODE_ENV ? process.env.NODE_ENV : "development";
