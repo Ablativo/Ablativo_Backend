@@ -131,34 +131,70 @@ exports.endVisit = (req, res) => {
     console.log(req.decoded._id + " DEBUG START: endVisit");
     var userId = req.decoded._id;
     now = Date.now()/1000
-    console.log(now)
 
     // Retrieve device telemetries
-    test = Device.scan().where('dateTime').ge(now-3600)
-      .exec((err, device) => {
-        console.log(device)
+
+    Device.scan('dateTime')
+      .ge((now-60000))
+      .exec((err, devices) => {
+        if (!err) {
+
+          //notes = [60, 60, 67, 67, 69, 69, 67, 65, 64, 64, 62, 62, 60, 60]
+          notes = []
+          devices.forEach(device => {
+            console.log("CREATING SEQUENCE")
+            notes.push(device.Payload.hum)
+            notes.push(device.Payload.temp)
+            notes.push(device.Payload.press)
+          });
+/*
+          SEQUENCE = {
+            notes: [],
+            totalTime: (notes.length)/2
+          }
+
+          startTime = 0.0
+          notes.forEach(n => {
+            SEQUENCE['notes'].push({pitch: n, startTime: startTime, endTime: startTime+0.5})
+            startTime = startTime+0.5
+          });
+
+          //console.log(SEQUENCE)
+
+          const quantizedSequence = core.sequences.quantizeNoteSequence(SEQUENCE, 1)
+          const mrnn = require('@magenta/music/node/music_rnn');
+          const model = new mrnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
+          model.initialize();
+          rnn_steps = 60;
+          rnn_temperature = 1.5;
+
+          model
+          .continueSequence(quantizedSequence, rnn_steps, rnn_temperature)
+          .then((sample) => {
+              //console.log(sample);
+              var track = new MidiWriter.Track();     
+              sample.notes.forEach(n => {
+                number_note = (n['pitch']).toString()
+                duration = 2**(Math.floor(Math.random() * 4)+1)
+                note  = new MidiWriter.NoteEvent({pitch:[number_note], duration: parseInt(duration)})
+                track.addEvent(note , (event, index) => {return {sequential: true}});
+              })
+              const writer = new MidiWriter.Writer(track);
+              writer.saveMIDI('./prova');
+              console.log("Done: MUSIC GENERATED !!!");
+            });
+*/
+        } else {
+          console.error(
+            req.decoded._id +
+              " ERROR: endVisit : error  >  " +
+              JSON.stringify(err)
+          );
+          res.send({ success: false, message: err });
+        }
       });
 
-/*
-    track.addEvent([
-            new MidiWriter.NoteEvent({pitch: ['21','22'], duration: '4'}),
-            new MidiWriter.NoteEvent({pitch: ['23'], duration: '2'}),
-            new MidiWriter.NoteEvent({pitch: ['24','25'], duration: '4'}),
-            new MidiWriter.NoteEvent({pitch: ['26'], duration: '2'}),
-            new MidiWriter.NoteEvent({pitch: ['27', 'C7', 'C7', 'C7', 'D7', 'D7', 'D7', 'D7'], duration: '8'}),
-            new MidiWriter.NoteEvent({pitch: ['E7','D7'], duration: '4'}),
-            new MidiWriter.NoteEvent({pitch: ['C7'], duration: '2'})
-        ], function(event, index) {
-        return {sequential: true};
-      }
-    );
-*/
-    var track = new MidiWriter.Track();
-    track.addEvent(NOTES_SEQUENCE);
-    const writer = new MidiWriter.Writer(track);
-    writer.saveMIDI('./prova');
-
-   console.log(req.decoded._id + " DEBUG END: endVisit");
+    console.log(req.decoded._id + " DEBUG END: endVisit");
   } catch (e) {
     console.error(req.decoded._id + " CATCH: endVisit : user error > " + e);
     return res.send({ success: false, status: 500, message: e.message });
