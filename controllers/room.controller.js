@@ -7,12 +7,39 @@ const path = require("path");
 
 const { v4: uuidv4 } = require("uuid");
 
+async function getTelemetries(room) {
+    return new Promise(function(resolve, reject) {
+
+        // get telemetries for the given room id
+        Device.query("id")
+            .eq(room.device)
+            .limit(1) // get only last value
+            .exec((error, response) => {
+
+            if (!error) {
+              telemetries = response[0].Payload
+              ret = {"_id": room._id, "device": room.device, "rommName": room.roomName, "image": room.image, "upVote": room.upVote,
+                      "temp": telemetries.temp, "hum": telemetries.hum, "press": telemetries.press}
+
+              resolve(JSON.stringify(ret));
+              console.log(ret);
+
+            } else {
+              console.error(" ERROR: get room telemetries> " + error );
+              res.send({ success: false, status: 404, message: error });
+            }
+        });
+
+    });
+}
 
 exports.getRoomList = async (req, res) => {
     try {
       console.log(" DEBUG START: getRoomList");
 
-      await Room.scan().exec( async function (error, result) {
+      await Room.scan()
+        .attributes(["_id", "device", "roomName", "description", "image", "upVote"])
+        .exec( async function (error, result) {
         if (!error) {
 
           console.log(
@@ -20,53 +47,12 @@ exports.getRoomList = async (req, res) => {
               JSON.stringify(result, undefined, 4)
           );
 
-/*
-          const final = []
-          // Fetch telemetris info
-          result.forEach( room => {
-            id = room.device;
-            name = room.roomName;
-            image = room.image;
-            upVote = room.upVote;
-            console.log(id + " " + name);
-
-
-            try {
-              await Device.query("id")
-                .eq("id")
-                .where("dateTime")
-                .startAt()
-                //.eq() /// last
-                .exec((error, telemetries) => {
-                if (!error) {
-                  ///
-                  console.log(id + " " + name + " " + image);
-                  console.log(telemetries);
-                  console.log(JSON.stringify(telemetries, undefined, 4));
-                  ///
-                  room = {"id": id, "name": name, "image": image, "upVote": upVote, "telemetries": telemetries}
-                  final.push(room);
-                } else {
-                  console.error(
-                    " ERROR: get room telemetries " + error
-                  );
-                  res.send({ success: false, status: 404, message: error });
-                }
-              })
-
-            } catch (e) {
-              console.error(" CATCH: get room telemetries " + e);
-              return res.send({ success: false, message: e.message });
-            }
-
-          });
-*/
-
           res.send({
             success: true,
             status: 200,
             data: result,
           });
+
         } else {
           console.error(
             " ERROR: getRoomList error> " + error
@@ -74,7 +60,6 @@ exports.getRoomList = async (req, res) => {
           res.send({ success: false, status: 404, message: error });
         }
       });
-
 
     } catch (e) {
       console.error(" CATCH: getRoomList : room error > " + e);
@@ -91,16 +76,42 @@ exports.getRoomByID = async (req, res) => {
 
     Room.query("_id")
       .eq(roomId)
-      .exec((err, room) => {
+      .exec(async (err, result) => {
         if (!err) {
           console.log(
               " INFO PARAM OUT: getRoomByID : " +
-              JSON.stringify(room, undefined, 4)
+              JSON.stringify(result, undefined, 4)
           );
-          res.send({
-            success: true,
-            status: 200,
-            data: room });
+
+          // [0] cause data inside array
+          const room = result[0];
+
+          // get telemetries for given room
+          await Device.query("id")
+              .eq(room.device)
+              .limit(1) // get only last value
+              .exec((error, response) => {
+
+              if (!error) {
+                const telemetries = response[0].Payload;
+                console.log(telemetries);
+
+                payload = {"_id": room._id, "image": room.image, "upVote": room.upVote,
+                      "roomName": room.roomName, "description": room.description, "artworks": room.artworks,
+                      "telemetries": telemetries}
+
+                res.send({
+                  success: true,
+                  status: 200,
+                  data: payload
+                 });
+
+              } else {
+                console.error(" ERROR: get room telemetries> " + error );
+                res.send({ success: false, status: 404, message: error });
+              }
+          });
+
         } else {
           console.error(
               " ERROR: getRoomByID : room error > " +
@@ -117,6 +128,7 @@ exports.getRoomByID = async (req, res) => {
     return res.send({ success: false, message: e.message });
   }
 };
+
 
 
 exports.getArtworkByID = (req, res) => {

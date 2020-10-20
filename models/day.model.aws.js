@@ -4,8 +4,8 @@ const dynamoose = require("dynamoose");
 const Schema = dynamoose.Schema;
 
 var DaySchema = new Schema({
-  day: {
-    type: String,
+  date: {
+    type: Number,
     required: true,
   },
   number: {
