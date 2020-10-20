@@ -14,10 +14,12 @@ module.exports = function (app) {
     
 
     app.get('/api/user/getMyInfo', user.getMyInfo);                    //get own user info
+
     app.get('/api/user/getMyVisit', user.getMyVisits);                 //get own user visits
     app.get('/api/user/getRoomByID', room.getRoomByID);                //get own room info
     app.get('/api/user/getArtworkByID', room.getArtworkByID);          //get own artwork info
 
+    
     
 
     //app.post('/api/users/logoutUser', user.logoutUser);              //logout user
