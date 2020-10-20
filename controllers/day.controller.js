@@ -4,29 +4,40 @@ var config = require("../config.js");
 const path = require("path");
 
 
+function sort_by_key(array, key) {
+ return array.sort(function(a, b) {
+  var x = parseInt(a[key]); var y = parseInt(b[key]);
+  return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+ });
+}
+
 exports.getWeek = async (req, res) => {
     try {
-      console.log(" DEBUG START: getRoomList");
+      console.log(" DEBUG START: getWeek");
 
-      await Day.scan().limit(7).exec( async function (error, result) {
-        if (!error) {
+      await Day.scan()
+        .limit(7)
+        .exec( async function (error, result) {
+          if (!error) {
 
-          console.log(
-              " INFO PARAM OUT: getRoomList : " +
-              JSON.stringify(result, undefined, 4)
-          );
+            console.log(
+                " INFO PARAM OUT: getWeek : " +
+                JSON.stringify(result, undefined, 4)
+            );
 
-          res.send({
-            success: true,
-            status: 200,
-            data: result,
-          });
-        } else {
-          console.error(
-            " ERROR: getWeek error> " + error
-          );
-          res.send({ success: false, status: 404, message: error });
-        }
+            final = sort_by_key(result, 'date')
+
+            res.send({
+              success: true,
+              status: 200,
+              data: final,
+            });
+          } else {
+            console.error(
+              " ERROR: getWeek error> " + error
+            );
+            res.send({ success: false, status: 404, message: error });
+          }
       });
 
 
