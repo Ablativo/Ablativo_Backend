@@ -7,31 +7,6 @@ const path = require("path");
 
 const { v4: uuidv4 } = require("uuid");
 
-async function getTelemetries(room) {
-    return new Promise(function(resolve, reject) {
-
-        // get telemetries for the given room id
-        Device.query("id")
-            .eq(room.device)
-            .limit(1) // get only last value
-            .exec((error, response) => {
-
-            if (!error) {
-              telemetries = response[0].Payload
-              ret = {"_id": room._id, "device": room.device, "rommName": room.roomName, "image": room.image, "upVote": room.upVote,
-                      "temp": telemetries.temp, "hum": telemetries.hum, "press": telemetries.press}
-
-              resolve(JSON.stringify(ret));
-              console.log(ret);
-
-            } else {
-              console.error(" ERROR: get room telemetries> " + error );
-              res.send({ success: false, status: 404, message: error });
-            }
-        });
-
-    });
-}
 
 exports.getRoomList = async (req, res) => {
     try {

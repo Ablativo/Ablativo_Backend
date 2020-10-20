@@ -12,7 +12,7 @@ var RoomSchema = new Schema({
   },
   device: {
     type: Device,
-    required: true,
+    //required: true,
   },
   image: {
     type: String
