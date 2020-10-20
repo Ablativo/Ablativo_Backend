@@ -7,8 +7,16 @@ const Schema = dynamoose.Schema;
 
 var DeviceSchema = new Schema({
   id: { type: String },
-  dateTime: { type: String },
-  Payload: {type: Map }
+  dateTime: { type: Number },
+  Payload: {
+    type: Object,
+    schema: {
+      deviceId: Number,
+      hum: Number,
+      press: Number,
+      temp: Number
+    }
+  }
 });
 
 var Device = dynamoose.model("Device", DeviceSchema);
