@@ -37,12 +37,11 @@ exports.getRoomList = async (req, res) => {
 
 exports.getRoomByID = async (req, res) => {
   try {
-    console.log(" DEBUG START: getRoomByID " );
+    console.log(" DEBUG START: getRoomByID ");
     var roomID = req.query.roomID;
 
     console.log(
-      " INFO PARAM IN: getRoomByID : " +
-        JSON.stringify(roomID, undefined, 4)
+      " INFO PARAM IN: getRoomByID : " + JSON.stringify(roomID, undefined, 4)
     );
 
     await Room.get(roomID, function (error, result) {
@@ -145,12 +144,14 @@ exports.createArtwork = async (req, res) => {
       artist: req.body.artist,
       image: req.body.image,
       description: req.body.description,
+      initialMessage: req.body.initialMessage,
+      questions: req.body.question,
     });
+    console.log(artwork);
 
     await artwork.save((err, artworkSaved) => {
       if (!err) {
         var artworks = [];
-
         if (artworkContained != undefined)
           artworkContained.filter((item) => artworks.push(item._id));
 
@@ -172,11 +173,7 @@ exports.createArtwork = async (req, res) => {
                 " INFO PARAM OUT: createArtwork : " +
                   JSON.stringify(artworkContained, undefined, 4)
               );
-              /* console.log(
-                req.decoded._id +
-                  " INFO PARAM OUT: createArtwork roomUpdated : " +
-                  JSON.stringify(room, undefined, 4)
-              ); */
+
               res.send({ success: true, status: 200, data: artworkSaved });
             }
           }
@@ -187,7 +184,7 @@ exports.createArtwork = async (req, res) => {
       }
     });
   } catch (e) {
-    console.error(req.decoded._id + " CATCH: createArtwork " + e);
+    console.error( " CATCH: createArtwork " + e);
     return res.send({ success: false, message: e.message });
   }
 };

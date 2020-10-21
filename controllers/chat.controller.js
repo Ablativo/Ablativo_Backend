@@ -13,10 +13,12 @@ const { v4: uuidv4 } = require("uuid");
 
 exports.getChatList = async (req, res) => {
   try {
-    console.log(req.decoded._id + " DEBUG START: getChatList");
+    console.log(
+      req.decoded._id + " DEBUG START: getChatList " + req.query.roomID
+    );
     var userID = req.decoded._id;
 
-    await ChatList.query("_userID")
+    /*     await ChatList.query("_userID")
       .eq(userID)
       .exec(async (err, chat) => {
         if (!err) {
@@ -24,36 +26,38 @@ exports.getChatList = async (req, res) => {
             req.decoded._id +
               " INFO PARAM OUT: getChatList : " +
               JSON.stringify(chat, undefined, 4)
-          );
-          if (chat.count == 0) {
-            console.log("DEBUG: getChatList : "+ req.query.roomID);
-            await Room.get(req.query.roomID, (err, result) => {
-              if (!err) {
-                console.log(result);
-                var chatAvailable = [];
-                var chatElement= {};
-                result.artworks.map((item, index) => {
-                  chatElement = {
-                    id: index,
-                    username: item.name,
-                    message: item.initialMessage
-                      ? item.initialMessage
-                      : "Benvenuto al museo di arte classica!",
-                    avatar: item.image,
-                    isRead: false,
-                    date: Date.now(),
-                  };
-                  chatAvailable.push(chatElement);
-                });
+          ); 
+          if (chat.count == 0) {*/
+    console.log("DEBUG: getChatList : " + req.query.roomID);
+    await Room.get(req.query.roomID, (err, result) => {
+      if (!err) {
+        console.log(result);
+        var chatAvailable = [];
+        var chatElement = {};
+        result.artworks.map((item, index) => {
+          chatElement = {
+            chatId: userID + "_" + item.name,
+            artworkID: item._id,
+            username: item.name,
+            message: item.initialMessage
+              ? item.initialMessage
+              : "Benvenuto al museo di arte classica!",
+            avatar: item.image,
+            isRead: false,
+            date: Date.now(),
+          };
+          chatAvailable.push(chatElement);
+        });
 
-                res.send({ success: true, status: 200, data: chatAvailable });
-              } else {
-                console.error(
-                  req.decoded._id + " ERROR: createChat : chat error > " + err
-                );
-              }
-            });
-          } else {
+        res.send({ success: true, status: 200, data: chatAvailable });
+      } else {
+        console.error(
+          req.decoded._id + " ERROR: createChat : chat error > " + err
+        );
+        return res.send({ status: 500, success: false, message: err.message });
+      }
+    });
+    /*  } else {
             console.error(
               req.decoded._id + " DEBUG: createChat : chat  > " + chat
             );
@@ -62,79 +66,115 @@ exports.getChatList = async (req, res) => {
               success: false,
               message: chat,
             });
-          }
+          } 
         } else {
           console.error(
             req.decoded._id + " ERROR: createChat : chat error > " + err
           );
           return res.send({ status: 500, success: false, message: e.message });
         }
-      });
+      });*/
   } catch (e) {
     console.error(req.decoded._id + " CATCH: getChatList : chat error > " + e);
     return res.send({ status: 500, success: false, message: e.message });
   }
 };
 
-exports.createChat = (req, res) => {
+exports.createChat = async (req, res) => {
   try {
-    console.log(req.decoded._id + " DEBUG START: createChat");
+    console.log(
+      req.decoded._id +
+        " DEBUG START: createChat : " +
+        JSON.stringify(req.query, null, 4)
+    );
     var userID = req.decoded._id;
-    var artworkID = req.body.artworkID;
-    var artworkAvatar = req.body.artworkAvatar;
-    var artworkName = req.body.artworkName;
+    var artworkID = req.query.artworkID;
+    var artwork = await Artwork.get(artworkID);
+
+    var artworkAvatar = artwork.image;
+    var artworkName = artwork.name;
+    var artworkQuestions = artwork.questions;
 
     var chatID = userID + "_" + artworkID;
 
-    var message = new ChatMessage({
-      id: uuidv4(),
-      user: {
-        id: artworkID,
-        name: artworkName,
-        avatar: artworkAvatar,
-      },
-      text: req.body.message,
-      createdAt: Date.now().toString(),
-    });
-
-    console.log(message);
-    message.save((err, messageSaved) => {
+    ChatList.get(chatID, (err, result) => {
       if (!err) {
-        console.log(
-          req.decoded._id +
-            " INFO PARAM OUT: createChat : " +
-            JSON.stringify(messageSaved, undefined, 4)
-        );
+        if (result) {
+          console.log(
+            req.decoded._id +
+              " INFO PARAM OUT: createChat : fetch chat messages : " +
+              JSON.stringify(result, undefined, 4)
+          );
+          var data = {
+            ...result,
+            artworkAvatar,
+            artworkName,
+            artworkQuestions,
+          };
+          res.send({ success: true, status: 200, data: data });
+        } else {
+          var message = new ChatMessage({
+            id: uuidv4(),
+            user: {
+              id: artworkID,
+              name: artworkName,
+              avatar: artworkAvatar,
+            },
+            text: artwork.initialMessage,
+            createdAt: Date.now().toString(),
+          });
 
-        var chat = new ChatList({
-          _id: chatID,
-          _userID: userID,
-          artworkName: artworkName,
-          artworkAvatar: artworkAvatar,
-          date: req.body.date,
-          messages: [messageSaved],
-        });
+          message.save((err, messageSaved) => {
+            if (!err) {
+              console.log(
+                req.decoded._id +
+                  " INFO PARAM OUT: createChat : create a new chat : " +
+                  JSON.stringify(messageSaved, undefined, 4)
+              );
 
-        chat.save((err, chatSaved) => {
-          if (!err) {
-            console.log(
-              req.decoded._id +
-                " INFO PARAM OUT: createChat : " +
-                JSON.stringify(chatSaved, undefined, 4)
-            );
-            res.send({ success: true, status: 200, data: chatSaved });
-          } else {
-            console.error(
-              req.decoded._id + " ERROR: createChat : chat error > " + err
-            );
-            res.send({ success: false, status: 500, message: err });
-          }
-        });
+              var chat = new ChatList({
+                _id: chatID,
+                _userID: userID,
+                artworkName: artworkName,
+                artworkAvatar: artworkAvatar,
+                date: Date.now(),
+                messages: [messageSaved],
+              });
+
+              chat.save((err, chatSaved) => {
+                if (!err) {
+                  console.log(
+                    req.decoded._id +
+                      " INFO PARAM OUT: createChat : " +
+                      JSON.stringify(chatSaved, undefined, 4)
+                  );
+                  var data = {
+                    ...chatSaved,
+                    artworkAvatar,
+                    artworkName,
+                    artworkQuestions,
+                  };
+                  res.send({ success: true, status: 200, data: data });
+                } else {
+                  console.error(
+                    req.decoded._id + " ERROR: createChat : chat error > " + err
+                  );
+                  res.send({ success: false, status: 500, message: err });
+                }
+              });
+            } else {
+              console.error(
+                req.decoded._id + " ERROR: createChat : message error > " + err
+              );
+              res.send({ success: false, status: 500, message: err });
+            }
+          });
+        }
       } else {
         console.error(
-          req.decoded._id + " ERROR: createChat : message error > " + err
+          req.decoded._id + " CATCH: createChat : chat error > " + err
         );
-        res.send({ success: false, status: 500, message: err });
+        return res.send({ status: 500, success: false, message: err.message });
       }
     });
 

@@ -6,5 +6,4 @@ module.exports = function (app) {
     app.post('/api/chat/createChat', chat.createChat);                      //create chat
     app.post('/api/chat/sendMessage', chat.sendMessage);                    //send message             
     app.get('/api/chat/getChatList', chat.getChatList);                     //create chat
-
 };

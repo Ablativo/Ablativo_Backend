@@ -30,13 +30,13 @@ var ArtworkSchema = new Schema({
   questions: {
     type: Object,
     schema: {
-      step0: {
-        type: Number,
-        default: 0,
+      Q: {
+        type: Array,
+        schema: [String],
       },
-      step1: {
-        type: Number,
-        default: 0,
+      A: {
+        type: Array,
+        schema: [String],
       },
     },
   },
