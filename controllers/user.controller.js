@@ -8,6 +8,8 @@ const path = require("path");
 
 const { v4: uuidv4 } = require("uuid");
 
+const Utility = require("./utility/music.utility")
+
 const Device = require("../models/device.model.aws");
 
 
@@ -129,28 +131,38 @@ exports.createVisit = (req, res) => {
 exports.endVisit = (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: endVisit");
-    var userId = req.decoded._id;
     now = Date.now()/1000
 
-    // Retrieve device telemetries
+    /***  SALVARE TIMESTAMP FINE VISITA ***/
 
+    // Retrieve device telemetries
     Device.scan('dateTime')
-      .ge((now-60000))
+      //.ge((now-3600))
       .exec((err, devices) => {
         if (!err) {
 
-          //notes = [60, 60, 67, 67, 69, 69, 67, 65, 64, 64, 62, 62, 60, 60]
           notes = []
+
+          // Retrieve Ambiental Telemetries from DB
           devices.forEach(device => {
-            console.log("CREATING SEQUENCE")
-            notes.push(device.Payload.hum)
-            notes.push(device.Payload.temp)
-            notes.push(device.Payload.press)
+            notes.push(Utility.num_normalizer(device.Payload.hum))
+            notes.push(Utility.num_normalizer(device.Payload.temp))
+            notes.push(Utility.num_normalizer(device.Payload.press))
           });
-/*
+
+          // Retrieve Smartphone Telemetries from body
+          req.body.telemetries.forEach(s => {
+            notes.push(Utility.num_normalizer((s.x + s.y + s.z)/3))
+          });
+
+          console.log(notes)
+
+
+          // CREATING SEQUENCE
+          console.log("CREATING SEQUENCE")
           SEQUENCE = {
             notes: [],
-            totalTime: (notes.length)/2
+            totalTime: (notes.length)/2 + 1
           }
 
           startTime = 0.0
@@ -159,9 +171,10 @@ exports.endVisit = (req, res) => {
             startTime = startTime+0.5
           });
 
-          //console.log(SEQUENCE)
-
+          // Quantized SEQUENCE
           const quantizedSequence = core.sequences.quantizeNoteSequence(SEQUENCE, 1)
+
+          // Continuing SEQUENCE with RNN
           const mrnn = require('@magenta/music/node/music_rnn');
           const model = new mrnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
           model.initialize();
@@ -179,11 +192,14 @@ exports.endVisit = (req, res) => {
                 note  = new MidiWriter.NoteEvent({pitch:[number_note], duration: parseInt(duration)})
                 track.addEvent(note , (event, index) => {return {sequential: true}});
               })
+              // Save Music
               const writer = new MidiWriter.Writer(track);
-              writer.saveMIDI('./prova');
+              console.log(track)
+              //writer.saveMIDI('./prova');
+              console.log(writer.dataUri())
               console.log("Done: MUSIC GENERATED !!!");
             });
-*/
+
         } else {
           console.error(
             req.decoded._id +
@@ -191,6 +207,8 @@ exports.endVisit = (req, res) => {
               JSON.stringify(err)
           );
           res.send({ success: false, message: err });
+
+          /*** SALVARE URI SU DYNAMO ***/
         }
       });
 
