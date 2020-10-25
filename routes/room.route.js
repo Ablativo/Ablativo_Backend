@@ -11,5 +11,6 @@ module.exports = function (app) {
 
     app.post('/dashapi/room/createRoom', room.createRoom);                 //create room
     app.post('/dashapi/room/createArtwork', room.createArtwork);           //create artwork
-    
+    app.post('/api/room/upvoteArtwork', room.upvoteArtwork);               //upvote artwork
+    app.post('/api/room/upvoteRoom', room.upvoteRoom)                      //upvote room
 };

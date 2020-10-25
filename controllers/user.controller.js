@@ -116,6 +116,4 @@ exports.createVisit = (req, res) => {
   }
 };
 
-//TODO
 
-//logoutUser

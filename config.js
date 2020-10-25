@@ -30,7 +30,7 @@ exports.BASE_URL = () => {
   if (self.baseUrl) return self.baseUrl;
   else {
     let ip = require("ip");
-    let ipAddress = "192.168.1.40";
+    let ipAddress = "192.168.1.200";
     //let ipAddress = ip.address();
     return self.PROTOCOL + "://" + ipAddress + ":" + self.PORT;
   }
@@ -41,3 +41,8 @@ exports.MENTOR = {
 	CESARE: 1,
 	NERONE: 2,
   };
+
+exports.UPVOTE={
+  DOWNVOTE: 0,
+  UPVOTE: 1,
+}

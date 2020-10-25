@@ -7,18 +7,23 @@ const path = require("path");
 
 const { v4: uuidv4 } = require("uuid");
 
-
 exports.getRoomList = async (req, res) => {
-    try {
-      console.log(" DEBUG START: getRoomList");
+  try {
+    console.log(" DEBUG START: getRoomList");
 
-      await Room.scan()
-        .attributes(["_id", "device", "roomName", "description", "image", "upVote"])
-        .exec( async function (error, result) {
+    await Room.scan()
+      .attributes([
+        "_id",
+        "device",
+        "roomName",
+        "description",
+        "image",
+        "upVote",
+      ])
+      .exec(async function (error, result) {
         if (!error) {
-
           console.log(
-              " INFO PARAM OUT: getRoomList : " +
+            " INFO PARAM OUT: getRoomList : " +
               JSON.stringify(result, undefined, 4)
           );
 
@@ -27,22 +32,16 @@ exports.getRoomList = async (req, res) => {
             status: 200,
             data: result,
           });
-
         } else {
-          console.error(
-            " ERROR: getRoomList error> " + error
-          );
+          console.error(" ERROR: getRoomList error> " + error);
           res.send({ success: false, status: 404, message: error });
         }
       });
-
-    } catch (e) {
-      console.error(" CATCH: getRoomList : room error > " + e);
-      return res.send({ status: 500, success: false, message: e.message });
-    }
-  };
-
-
+  } catch (e) {
+    console.error(" CATCH: getRoomList : room error > " + e);
+    return res.send({ status: 500, success: false, message: e.message });
+  }
+};
 
 exports.getRoomByID = async (req, res) => {
   try {
@@ -53,13 +52,12 @@ exports.getRoomByID = async (req, res) => {
       " INFO PARAM IN: getRoomByID : " + JSON.stringify(roomID, undefined, 4)
     );
 
-
     Room.query("_id")
-      .eq(roomId)
+      .eq(roomID)
       .exec(async (err, result) => {
         if (!err) {
           console.log(
-              " INFO PARAM OUT: getRoomByID : " +
+            " INFO PARAM OUT: getRoomByID : " +
               JSON.stringify(result, undefined, 4)
           );
 
@@ -68,38 +66,41 @@ exports.getRoomByID = async (req, res) => {
 
           // get telemetries for given room
           await Device.query("id")
-              .eq(room.device)
-              .limit(1) // get only last value
-              .exec((error, response) => {
-
+            .eq(room.device)
+            .limit(1) // get only last value
+            .exec((error, response) => {
               if (!error) {
                 const telemetries = response[0].Payload;
                 console.log(telemetries);
 
-                payload = {"_id": room._id, "image": room.image, "upVote": room.upVote,
-                      "roomName": room.roomName, "description": room.description, "artworks": room.artworks,
-                      "telemetries": telemetries}
+                payload = {
+                  _id: room._id,
+                  image: room.image,
+                  upVote: room.upVote,
+                  roomName: room.roomName,
+                  description: room.description,
+                  artworks: room.artworks,
+                  telemetries: telemetries,
+                };
 
                 res.send({
                   success: true,
                   status: 200,
-                  data: payload
-                 });
-
+                  data: payload,
+                });
               } else {
-                console.error(" ERROR: get room telemetries> " + error );
+                console.error(" ERROR: get room telemetries> " + error);
                 res.send({ success: false, status: 404, message: error });
               }
-          });
-
+            });
         } else {
           console.error(
-              " ERROR: getRoomByID : room error > " +
-              JSON.stringify(err)
+            " ERROR: getRoomByID : room error > " + JSON.stringify(err)
           );
           res.send({
             success: false,
-            message: err });
+            message: err,
+          });
         }
       });
     console.log(" DEBUG END: getRoomByID");
@@ -108,8 +109,6 @@ exports.getRoomByID = async (req, res) => {
     return res.send({ success: false, message: e.message });
   }
 };
-
-
 
 exports.getArtworkByID = (req, res) => {
   try {
@@ -121,14 +120,13 @@ exports.getArtworkByID = (req, res) => {
       .exec((err, artwork) => {
         if (!err) {
           console.log(
-              " INFO PARAM OUT: getArtworkByID : " +
+            " INFO PARAM OUT: getArtworkByID : " +
               JSON.stringify(artwork, undefined, 4)
           );
           res.send({ success: true, status: 200, data: artwork });
         } else {
           console.error(
-              " ERROR: getArtworkByID  error > " +
-              JSON.stringify(err)
+            " ERROR: getArtworkByID  error > " + JSON.stringify(err)
           );
           res.send({ success: false, message: err });
         }
@@ -138,8 +136,6 @@ exports.getArtworkByID = (req, res) => {
     return res.send({ success: false, message: e.message });
   }
 };
-
-
 
 // not currently implemented on dashboard... only for tests
 exports.createRoom = async (req, res) => {
@@ -158,10 +154,10 @@ exports.createRoom = async (req, res) => {
     await room.save((err, roomSaved) => {
       if (!err) {
         console.log(
-            " INFO PARAM OUT: createRoom : " +
+          " INFO PARAM OUT: createRoom : " +
             JSON.stringify(roomSaved, undefined, 4)
         );
-        console.log( " DEBUG END: createRoom");
+        console.log(" DEBUG END: createRoom");
         res.send({ success: true, status: 200, data: roomSaved });
       } else {
         console.error(" ERROR: createRoom error > " + err);
@@ -174,11 +170,9 @@ exports.createRoom = async (req, res) => {
   }
 };
 
-
-
 exports.createArtwork = async (req, res) => {
   try {
-    console.log(" DEBUG START: createArtwork " + req.body );
+    console.log(" DEBUG START: createArtwork " + req.body);
 
     const _id = uuidv4();
     const room = await Room.get(req.body.roomID);
@@ -211,13 +205,12 @@ exports.createArtwork = async (req, res) => {
           (error, room) => {
             if (error) {
               console.error(
-                  " ERROR: createArtwork on update room error > " +
-                  err
+                " ERROR: createArtwork on update room error > " + err
               );
               res.send({ success: false, status: 500, message: err });
             } else {
               console.log(
-                  " INFO PARAM OUT: createArtwork : " +
+                " INFO PARAM OUT: createArtwork : " +
                   JSON.stringify(artworks, undefined, 4)
               );
 
@@ -231,7 +224,71 @@ exports.createArtwork = async (req, res) => {
       }
     });
   } catch (e) {
-    console.error( " CATCH: createArtwork " + e);
+    console.error(" CATCH: createArtwork " + e);
     return res.send({ success: false, message: e.message });
+  }
+};
+
+exports.upvoteRoom = async (req, res) => {
+  try {
+    console.log(
+      " DEBUG START: upvoteRoom" + JSON.stringify(req.body.roomID, null, 4)
+    );
+
+    await Room.update(
+      { _id: req.body.roomID },
+      { $ADD: { upVote: 1 } },
+      async function (error, result) {
+        if (!error) {
+          console.log(
+            " INFO PARAM OUT: upvoteRoom : " +
+              JSON.stringify(result, undefined, 4)
+          );
+
+          res.send({
+            success: true,
+            status: 200,
+          });
+        } else {
+          console.error(" ERROR: upvoteRoom error> " + error);
+          res.send({ success: false, status: 404, message: error });
+        }
+      }
+    );
+  } catch (e) {
+    console.error(" CATCH: upvoteRoom : room error > " + e);
+    return res.send({ status: 500, success: false, message: e.message });
+  }
+};
+
+exports.upvoteArtwork = async (req, res) => {
+  try {
+    console.log(
+      " DEBUG START: upvoteArtwork" + JSON.stringify(req.body, null, 4)
+    );
+
+    await Artwork.update(
+      { _id: req.body.artworkID },
+      { $ADD: { upVote: req.body.value } },
+      async function (error, result) {
+        if (!error) {
+          console.log(
+            " INFO PARAM OUT: upvoteArtwork  : " +
+              JSON.stringify(result, undefined, 4)
+          );
+
+          res.send({
+            success: true,
+            status: 200,
+          });
+        } else {
+          console.error(" ERROR: upvoteArtwork  error> " + error);
+          res.send({ success: false, status: 404, message: error });
+        }
+      }
+    );
+  } catch (e) {
+    console.error(" CATCH: upvoteRoom : room error > " + e);
+    return res.send({ status: 500, success: false, message: e.message });
   }
 };
