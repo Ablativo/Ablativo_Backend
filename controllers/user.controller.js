@@ -133,8 +133,6 @@ exports.endVisit = (req, res) => {
     console.log(req.decoded._id + " DEBUG START: endVisit");
     now = Date.now()/1000
 
-    /***  SALVARE TIMESTAMP FINE VISITA ***/
-
     // Retrieve device telemetries
     Device.scan('dateTime')
       //.ge((now-3600))
@@ -196,10 +194,33 @@ exports.endVisit = (req, res) => {
               const writer = new MidiWriter.Writer(track);
               console.log(track)
               //writer.saveMIDI('./prova');
-              console.log(writer.dataUri())
+              musicURI = writer.dataUri()
               console.log("Done: MUSIC GENERATED !!!");
             });
-
+            
+            Visit.update(
+              {
+                _id: req.decoded._id,
+                musicLink: musicURI,
+                /*** SALVARE TIME STAMP ***/
+              },
+              (error, visitSaved) => {
+                if (error) {
+                  console.error(
+                    req.decoded._id +
+                      " ERROR: sendMessage on update room error > " +
+                      err
+                  );
+                  res.send({ success: false, status: 500, message: err });
+                } else {
+                  console.log(
+                    req.decoded._id +
+                      " INFO PARAM OUT: sendMessage : " +
+                      JSON.stringify(visitSaved, undefined, 4)
+                  );
+                  res.send({ success: true, status: 200, data: visitSaved });
+                }
+              });
         } else {
           console.error(
             req.decoded._id +
@@ -207,8 +228,6 @@ exports.endVisit = (req, res) => {
               JSON.stringify(err)
           );
           res.send({ success: false, message: err });
-
-          /*** SALVARE URI SU DYNAMO ***/
         }
       });
 
