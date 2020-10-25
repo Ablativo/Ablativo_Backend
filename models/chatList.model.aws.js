@@ -26,7 +26,7 @@ var ChatListSchema = new Schema({
     required: true,
   },
   date: {
-    type: Number,
+    type: Date,
     required: true,
   },
   messages: {

@@ -36,7 +36,7 @@ exports.getChatList = async (req, res) => {
         var chatElement = {};
         result.artworks.map((item, index) => {
           chatElement = {
-            chatId: userID + "_" + item.name,
+            chatId: userID + "_" + item._id,
             artworkID: item._id,
             username: item.name,
             message: item.initialMessage
@@ -44,7 +44,7 @@ exports.getChatList = async (req, res) => {
               : "Benvenuto al museo di arte classica!",
             avatar: item.image,
             isRead: false,
-            date: Date.now(),
+            date: new Date(),
           };
           chatAvailable.push(chatElement);
         });
@@ -113,15 +113,20 @@ exports.createChat = async (req, res) => {
           };
           res.send({ success: true, status: 200, data: data });
         } else {
+          console.log(
+            req.decoded._id +
+              " INFO PARAM OUT: createChat : no such document create a new one : "
+          );
+          
           var message = new ChatMessage({
-            id: uuidv4(),
+            _id: uuidv4(),
             user: {
-              id: artworkID,
+              _id: artworkID,
               name: artworkName,
               avatar: artworkAvatar,
             },
             text: artwork.initialMessage,
-            createdAt: Date.now().toString(),
+            createdAt: new Date(),
           });
 
           message.save((err, messageSaved) => {
@@ -137,7 +142,7 @@ exports.createChat = async (req, res) => {
                 _userID: userID,
                 artworkName: artworkName,
                 artworkAvatar: artworkAvatar,
-                date: Date.now(),
+                date: new Date(),
                 messages: [messageSaved],
               });
 
@@ -187,32 +192,31 @@ exports.createChat = async (req, res) => {
 
 exports.sendMessage = async (req, res) => {
   try {
-    console.log(req.decoded._id + " DEBUG START: sendMessage");
-    var userID = req.decoded._id;
-    var artworkID = req.body.artworkID;
-    var artworkAvatar = req.body.artworkAvatar;
-    var artworkName = req.body.artworkName;
-    var chatID = userID + "_" + artworkID;
+    console.log(
+      req.decoded._id +
+        " DEBUG START: sendMessage" +
+        JSON.stringify(req.body, null, 4)
+    );
 
+    var chatID = req.body.chatID;
     var message = new ChatMessage({
-      id: uuidv4(),
-      user: {
-        id: artworkID,
-        name: artworkName,
-        avatar: artworkAvatar,
-      },
+      _id: uuidv4(),
+      user: req.body.user,
       text: req.body.message,
-      createdAt: Date.now().toString(),
+      createdAt: new Date(),
     });
 
     var chat = await ChatList.get(chatID);
+    console.log("Chat: " + chat);
 
     var lastMessages = [];
 
-    chat.messages.filter((item) => lastMessages.push(item.id));
+    chat.messages.filter((item) => lastMessages.push(item._id));
 
     var messages =
-      lastMessages == undefined ? [message.id] : [...lastMessages, message.id];
+      lastMessages == undefined
+        ? [message._id]
+        : [...lastMessages, message._id];
 
     await message.save((err, messageSaved) => {
       if (!err) {

@@ -4,14 +4,14 @@ const dynamoose = require("dynamoose");
 const Schema = dynamoose.Schema;
 
 var ChatMessageSchema = new Schema({
-  id: {
+  _id: {
     type: String,
     hashKey: true,
   },
   user: {
     type: Object,
     schema: {
-      id: String,
+      _id: String,
       name: String,
       avatar: String,
     },
@@ -20,7 +20,7 @@ var ChatMessageSchema = new Schema({
     type: String,
   },
   createdAt: {
-    type: String,
+    type: Date,
   },
 });
 
