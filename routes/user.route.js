@@ -14,11 +14,7 @@ module.exports = function (app) {
     app.post('/api/user/endVisit', user.endVisit);                      //end visit
 
     app.get('/api/user/getMyInfo', user.getMyInfo);                    //get own user info
-/*
-    app.get('/api/user/getMyVisits', user.getMyVisits);                 //get own user visits
-    app.get('/api/user/getRoomByID', user.getRoomByID);                //get own room info
-    app.get('/api/user/getArtworkByID', user.getArtworkByID);          //get own artwork info
-*/
+
     app.get('/api/user/getMyVisit', user.getMyVisits);                 //get own user visits
     app.get('/api/user/getRoomByID', room.getRoomByID);                //get own room info
     app.get('/api/user/getArtworkByID', room.getArtworkByID);          //get own artwork info
