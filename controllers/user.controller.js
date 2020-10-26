@@ -14,7 +14,6 @@ const Device = require("../models/device.model.aws");
 
 
 //MUSIC MODULES
-const mvae = require('@magenta/music/node/music_vae');
 const core = require('@magenta/music/node/core');
 const MidiWriter = require("midi-writer-js");
 
@@ -127,7 +126,6 @@ exports.createVisit = (req, res) => {
   }
 };
 
-//////// WORK IN PROGRESS ////////
 exports.endVisit = (req, res) => {
   try {
     console.log(req.decoded._id + " DEBUG START: endVisit");
@@ -135,7 +133,7 @@ exports.endVisit = (req, res) => {
 
     // Retrieve device telemetries
     Device.scan('dateTime')
-      //.ge((now-3600))
+      .ge((now-3600))
       .exec((err, devices) => {
         if (!err) {
 
@@ -143,18 +141,16 @@ exports.endVisit = (req, res) => {
 
           // Retrieve Ambiental Telemetries from DB
           devices.forEach(device => {
-            notes.push(Utility.num_normalizer(device.Payload.hum))
-            notes.push(Utility.num_normalizer(device.Payload.temp))
-            notes.push(Utility.num_normalizer(device.Payload.press))
+            notes.push(Utility.num_normalizer(device.Payload.hum, 'melody'))
+            notes.push(Utility.num_normalizer(device.Payload.temp, 'melody'))
+            notes.push(Utility.num_normalizer(device.Payload.press, 'melody'))
           });
 
           // Retrieve Smartphone Telemetries from body
           req.body.telemetries.forEach(s => {
-            notes.push(Utility.num_normalizer((s.x + s.y + s.z)/3))
+            notes.push(Utility.num_normalizer((s.x + s.y + s.z)/3), 'melody')
+            // Retrive values of the heart rate sensor (TO DO)
           });
-
-          console.log(notes)
-
 
           // CREATING SEQUENCE
           console.log("CREATING SEQUENCE")
@@ -174,7 +170,8 @@ exports.endVisit = (req, res) => {
 
           // Continuing SEQUENCE with RNN
           const mrnn = require('@magenta/music/node/music_rnn');
-          const model = new mrnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
+          //const model = new mrnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
+          const model = new mrnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn')
           model.initialize();
           rnn_steps = 60;
           rnn_temperature = 1.5;
@@ -182,7 +179,6 @@ exports.endVisit = (req, res) => {
           model
           .continueSequence(quantizedSequence, rnn_steps, rnn_temperature)
           .then((sample) => {
-              //console.log(sample);
               var track = new MidiWriter.Track();     
               sample.notes.forEach(n => {
                 number_note = (n['pitch']).toString()
@@ -192,35 +188,37 @@ exports.endVisit = (req, res) => {
               })
               // Save Music
               const writer = new MidiWriter.Writer(track);
-              console.log(track)
               //writer.saveMIDI('./prova');
               musicURI = writer.dataUri()
+              console.log(musicURI)
               console.log("Done: MUSIC GENERATED !!!");
             });
-            
-            Visit.update(
-              {
-                _id: req.decoded._id,
-                musicLink: musicURI,
-                /*** SALVARE TIME STAMP ***/
-              },
-              (error, visitSaved) => {
-                if (error) {
-                  console.error(
-                    req.decoded._id +
-                      " ERROR: sendMessage on update room error > " +
-                      err
-                  );
-                  res.send({ success: false, status: 500, message: err });
-                } else {
-                  console.log(
-                    req.decoded._id +
-                      " INFO PARAM OUT: sendMessage : " +
-                      JSON.stringify(visitSaved, undefined, 4)
-                  );
-                  res.send({ success: true, status: 200, data: visitSaved });
-                }
-              });
+/*
+Update the visit params on the DB (TO DO)
+          Visit.update(
+            {
+              _id: req.decoded._id,
+              musicLink: musicURI,
+              finishedAt: now.toString()
+            },
+            (error, visitSaved) => {
+              if (error) {
+                console.error(
+                  req.decoded._id +
+                    " ERROR: sendMessage on update room error > " +
+                    err
+                );
+                res.send({ success: false, status: 500, message: err });
+              } else {
+                console.log(
+                  req.decoded._id +
+                    " INFO PARAM OUT: sendMessage : " +
+                    JSON.stringify(visitSaved, undefined, 4)
+                );
+                res.send({ success: true, status: 200, data: visitSaved });
+              }
+            });
+*/
         } else {
           console.error(
             req.decoded._id +
@@ -230,14 +228,10 @@ exports.endVisit = (req, res) => {
           res.send({ success: false, message: err });
         }
       });
-
-    console.log(req.decoded._id + " DEBUG END: endVisit");
+    
+    console.log(req.decoded._id + " DEBUG END: endVisit")
   } catch (e) {
     console.error(req.decoded._id + " CATCH: endVisit : user error > " + e);
     return res.send({ success: false, status: 500, message: e.message });
   }
 };
-
-//TODO
-
-//logoutUser
