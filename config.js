@@ -13,8 +13,9 @@ var self = require("./config.js");
     pwd: "",
   },
 }; */
-exports.AWS_ACCESS_KEY_ID = "ASIAZ2AKNYOWJEROJXWF"
-exports.AWS_SECRET_ACCESS_KEY = "iDR9izrqzixYc1ogi+JjjWLJt2eI9jalHR6pq1GY"
+
+exports.AWS_ACCESS_KEY_ID = "-"
+exports.AWS_SECRET_ACCESS_KEY = "-"
 exports.AWS_REGION = "us-east-1"
 
 var env = process.env.NODE_ENV ? process.env.NODE_ENV : "development";

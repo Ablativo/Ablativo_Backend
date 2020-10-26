@@ -18,9 +18,10 @@ var authorization = require("./controllers/auth/authorization.middleware.js");
 const userRoute = require("./routes/user.route");
 const chatRoute = require("./routes/chat.route");
 const roomRoute = require("./routes/room.route");
+const dayRoute = require("./routes/day.route");
 
 // App
-(app = express()), (port = process.env.PORT || 8888);
+(app = express()), (port = process.env.PORT || 5000);
 app.listen(port);
 
 app.use("/validate", express.static(path.join(__dirname, "static", "public")));
@@ -107,10 +108,11 @@ passport.deserializeUser(function (id, done) {
     });
 });
 
-app.use("/api", authorization.validateToken); //all /api requests must be valitadated 
+app.use("/api", authorization.validateToken); //all /api requests must be valitadated
 userRoute(app); //register the route
 chatRoute(app);
 roomRoute(app);
+dayRoute(app);
 
 app.all("*", (req, res) => {
   //wrong requests are mapped on 404
