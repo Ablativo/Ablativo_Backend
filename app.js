@@ -8,6 +8,8 @@ const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
+var AWS = require('aws-sdk');
+AWS.config.update({region:'us-east-1'});
 var config = require("./config.js");
 
 

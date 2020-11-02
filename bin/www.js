@@ -10,6 +10,7 @@ var config = require("../config");
 var port = normalizePort(process.env.PORT || "8888");
 app.set("port", port);
 
+
 // DATABASE
 var DB = config.DB;
 app.set("NODE_ENV", config.NODE_ENV);
