@@ -14,6 +14,8 @@
     "nodemon": "^2.0.4"
   },
   "dependencies": {
+    "@magenta/music": "^1.20.0",
+    "@tensorflow/tfjs-node": "^2.6.0",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
@@ -22,11 +24,13 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "jsonwebtoken": "^8.5.1",
+    "midi-writer-js": "^1.7.4",
     "mongoose": "^5.8.1",
     "mongoose-paginate": "^5.0.3",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "randomstring": "^1.1.5",
+    "tone": "^14.7.58",
     "uuid": "^8.3.0",
     "validator": "^12.1.0"
   }
