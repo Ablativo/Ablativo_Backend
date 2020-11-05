@@ -26,8 +26,8 @@ var VisitSchema = new Schema({
   location: { type: String },
   time: { type: String },
   musicLink: { type: String },
-  createdAt: { type: String },
-  finishedAt: {type: String},
+  createdAt: { type: Date },
+  finishedAt: {type: Date },
   image: { type: String },
   /* questions: {
     type: "list",
