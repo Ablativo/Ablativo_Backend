@@ -21,7 +21,7 @@ const roomRoute = require("./routes/room.route");
 const dayRoute = require("./routes/day.route");
 
 // App
-(app = express()), (port = process.env.PORT || 5000);
+(app = express()), (port = process.env.PORT || 8888);
 app.listen(port);
 
 app.use("/validate", express.static(path.join(__dirname, "static", "public")));
