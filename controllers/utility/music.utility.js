@@ -9,7 +9,6 @@ exports.num_normalizer = function(n, model){
         return n;
     }
     else{
-        console.log('melody')
         if(n < 21 || n > 108) n = n%87 + 21
         return n;
     }

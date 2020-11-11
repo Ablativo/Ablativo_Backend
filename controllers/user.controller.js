@@ -104,14 +104,19 @@ exports.createVisit = (req, res) => {
             " INFO PARAM OUT: createVisit : " +
             JSON.stringify(visitSaved, undefined, 4)
         );
-        res.send({ success: true, status: 200, data: visitSaved, visitID: _id  });
+        res.send({
+          success: true,
+          status: 200,
+          data: visitSaved,
+          visitID: _id,
+        });
       } else {
         console.error(
           req.decoded._id +
             " ERROR: createVisit : visit error > " +
             JSON.stringify(err)
         );
-        res.send({ success: false, status: 500, message: err,});
+        res.send({ success: false, status: 500, message: err });
       }
     });
     console.log(req.decoded._id + " DEBUG END: createVisit");
@@ -145,8 +150,10 @@ exports.endVisit = (req, res) => {
 
           // Retrieve Smartphone Telemetries from body
           req.body.telemetries.forEach((s) => {
-            notes.push(Utility.num_normalizer((s.x + s.y + s.z) / 3), "melody");
-            // Retrive values of the heart rate sensor (TO DO)
+            if (s.sensor == "Heartrate") 
+              notes.push(Utility.num_normalizer(s.value), "melody");
+            else 
+              notes.push(Utility.num_normalizer((s.x + s.y + s.z) / 3), "melody");
           });
 
           // CREATING SEQUENCE
@@ -199,37 +206,39 @@ exports.endVisit = (req, res) => {
               });
               // Save Music
               const writer = new MidiWriter.Writer(track);
-              //writer.saveMIDI('./prova');
-              let musicURI = writer.dataUri();
-              console.log(musicURI);
+              musicURI = writer.base64();
               console.log("Done: MUSIC GENERATED !!!");
+            })
+            .then(() => {
+              Visit.update(
+                {
+                  _id: req.body.visitID,
+                  finishedAt: new Date(),
+                },
+                (error, visitSaved) => {
+                  if (error) {
+                    console.error(
+                      req.decoded._id +
+                        " ERROR: sendMessage on update visit error > " +
+                        err
+                    );
+                    res.send({ success: false, status: 500, message: err });
+                  } else {
+                    console.log(
+                      req.decoded._id +
+                        " INFO PARAM OUT: sendMessage : " +
+                        JSON.stringify(visitSaved, undefined, 4)
+                    );
+                    res.send({
+                      success: true,
+                      status: 200,
+                      data: visitSaved,
+                      musicURI: musicURI
+                    });
+                  }
+                }
+              );
             });
-          /*
-Update the visit params on the DB (TO DO)
-          Visit.update(
-            {
-              _id: req.body._id,
-              musicLink: musicURI,
-              finishedAt: new Date(),
-            },
-            (error, visitSaved) => {
-              if (error) {
-                console.error(
-                  req.decoded._id +
-                    " ERROR: sendMessage on update room error > " +
-                    err
-                );
-                res.send({ success: false, status: 500, message: err });
-              } else {
-                console.log(
-                  req.decoded._id +
-                    " INFO PARAM OUT: sendMessage : " +
-                    JSON.stringify(visitSaved, undefined, 4)
-                );
-                res.send({ success: true, status: 200, data: visitSaved });
-              }
-            });
-*/
         } else {
           console.error(
             req.decoded._id +
@@ -239,7 +248,6 @@ Update the visit params on the DB (TO DO)
           res.send({ success: false, message: err });
         }
       });
-
     console.log(req.decoded._id + " DEBUG END: endVisit");
   } catch (e) {
     console.error(req.decoded._id + " CATCH: endVisit : user error > " + e);
