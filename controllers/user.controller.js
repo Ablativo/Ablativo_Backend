@@ -206,7 +206,7 @@ exports.endVisit = (req, res) => {
               });
               // Save Music
               const writer = new MidiWriter.Writer(track);
-              musicURI = writer.base64();
+              writer.saveMIDI("./music/"+req.body.visitID+"_"+req.decoded._id);
               console.log("Done: MUSIC GENERATED !!!");
             })
             .then(() => {
@@ -233,7 +233,7 @@ exports.endVisit = (req, res) => {
                       success: true,
                       status: 200,
                       data: visitSaved,
-                      musicURI: musicURI
+                      musicURI: "./music/"+req.body.visitID+"_"+req.decoded._id
                     });
                   }
                 }
