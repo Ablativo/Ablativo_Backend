@@ -70,10 +70,11 @@ exports.getRoomByID = async (req, res) => {
             .limit(1) // get only last value
             .exec((error, response) => {
               if (!error) {
-                const telemetries = response[0].Payload;
+                const telemetries =
+                  response[0].Payload != undefined ? response[0].Payload : {};
                 console.log(telemetries);
 
-                payload = {
+                let payload = {
                   _id: room._id,
                   image: room.image,
                   upVote: room.upVote,
@@ -82,15 +83,21 @@ exports.getRoomByID = async (req, res) => {
                   artworks: room.artworks,
                   telemetries: telemetries,
                 };
-
                 res.send({
                   success: true,
                   status: 200,
                   data: payload,
+                  appdata: result,
                 });
               } else {
                 console.error(" ERROR: get room telemetries> " + error);
-                res.send({ success: false, status: 404, message: error });
+                res.send({
+                  success: true,
+                  status: 200,
+                  data: "Missing Payload",
+                  appdata: result,
+                });
+                //res.send({ success: false, status: 404, message: error });
               }
             });
         } else {

@@ -6,7 +6,7 @@ const Room = require("./room.model.aws");
 
 const Schema = dynamoose.Schema;
 
-var ArtworkSchema = new Schema({
+var MentorSchema = new Schema({
   _id: {
     type: String,
     default: uuidv4(),
@@ -18,10 +18,8 @@ var ArtworkSchema = new Schema({
     index: {
       name: "nameIndex",
       global: true,
-    }, // creates a global secondary index with the name `nameIndex` and hashKey `name`
+    }, // creates a global secondary index with the name `usernameIndex` and hashKey `username`
   },
-  //room: { type: Room, required: true},
-  artist: { type: String, required: true },
   image: { type: String },
   description: { type: String },
   upVote: { type: Number, default: 0 },
@@ -38,10 +36,15 @@ var ArtworkSchema = new Schema({
         type: Array,
         schema: [String],
       },
+      R: {
+        type: Array,
+        schema: [String],
+      },
+      
     },
   },
 });
 
-var Artwork = dynamoose.model("Artwork", ArtworkSchema);
+var Mentor = dynamoose.model("Mentor", MentorSchema);
 
-module.exports = Artwork;
+module.exports = Mentor;

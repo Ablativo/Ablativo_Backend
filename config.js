@@ -24,7 +24,7 @@ exports.NODE_ENV = env;
 exports.projectName = "Ablativo";
 
 exports.PROTOCOL = process.env.PROTOCOL ? process.env.PROTOCOL : "http";
-exports.PORT = process.env.PORT ? process.env.PORT : 8888;
+exports.PORT = process.env.PORT ? process.env.PORT : 8000;
 
 exports.BASE_URL = () => {
   if (self.baseUrl) return self.baseUrl;
