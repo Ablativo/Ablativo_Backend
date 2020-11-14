@@ -206,7 +206,7 @@ exports.endVisit = (req, res) => {
               });
               // Save Music
               const writer = new MidiWriter.Writer(track);
-              writer.saveMIDI("./music/"+req.body.visitID+"_"+req.decoded._id);
+              writer.saveMIDI("./music/"+req.body.visitID+"_"+req.decoded._id+".mid");
               console.log("Done: MUSIC GENERATED !!!");
             })
             .then(() => {
@@ -214,6 +214,7 @@ exports.endVisit = (req, res) => {
                 {
                   _id: req.body.visitID,
                   finishedAt: new Date(),
+                  musicLink: req.body.visitID+"_"+req.decoded._id
                 },
                 (error, visitSaved) => {
                   if (error) {
@@ -233,7 +234,6 @@ exports.endVisit = (req, res) => {
                       success: true,
                       status: 200,
                       data: visitSaved,
-                      musicURI: "./music/"+req.body.visitID+"_"+req.decoded._id
                     });
                   }
                 }
@@ -254,3 +254,4 @@ exports.endVisit = (req, res) => {
     return res.send({ success: false, status: 500, message: e.message });
   }
 };
+

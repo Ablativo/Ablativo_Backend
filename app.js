@@ -8,10 +8,9 @@ const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
-var AWS = require('aws-sdk');
-AWS.config.update({region:'us-east-1'});
+var AWS = require("aws-sdk");
+AWS.config.update({ region: "us-east-1" });
 var config = require("./config.js");
-
 
 // Routes
 var authorization = require("./controllers/auth/authorization.middleware.js");
@@ -19,10 +18,12 @@ const userRoute = require("./routes/user.route");
 const chatRoute = require("./routes/chat.route");
 const roomRoute = require("./routes/room.route");
 const dayRoute = require("./routes/day.route");
+const mentorRoute = require("./routes/mentor.route")
 
 // App
-(app = express()), (port = process.env.PORT || 8888);
-app.listen(port);
+const app = express();
+
+app.use('/music', express.static(__dirname + '/music'));
 
 app.use("/validate", express.static(path.join(__dirname, "static", "public")));
 app.use(express.json());
@@ -113,6 +114,7 @@ userRoute(app); //register the route
 chatRoute(app);
 roomRoute(app);
 dayRoute(app);
+mentorRoute(app);
 
 app.all("*", (req, res) => {
   //wrong requests are mapped on 404

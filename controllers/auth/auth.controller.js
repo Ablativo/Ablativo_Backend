@@ -77,7 +77,7 @@ exports.authenticate = (req, res) => {
                 "INFO PARAM OUT: authenticate : Logged successfully " +
                   req.body.username
               );
-              res.send({ success: true, status: 200, token: token });
+              res.send({ success: true, status: 200, token: token, mentor: user.mentor });
             }
           });
         }
