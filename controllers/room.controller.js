@@ -43,6 +43,45 @@ exports.getRoomList = async (req, res) => {
   }
 };
 
+exports.getRoomByDeviceID = async (req, res) => {
+  try {
+    console.log(" DEBUG START: getRoomByDeviceID ");
+    var deviceID = req.query.deviceID;
+
+    console.log(
+      " INFO PARAM IN: getRoomByDeviceID : " +
+        JSON.stringify(deviceID, undefined, 4)
+    );
+
+    Room.query("device.id")
+      .eq(deviceID)
+      .exec(async (err, result) => {
+        if (!err) {
+          console.log(
+            " INFO PARAM OUT: getRoomByDeviceID : " +
+              JSON.stringify(result, undefined, 4)
+          );
+          res.send({
+            success: true,
+            status: 200,
+            data: result,
+          });
+        } else {
+          console.log(" DEBUG END: getRoomByDeviceID " + err);
+          res.send({
+            success: false,
+            status: 500,
+            message: 'Cannot retrieve room'
+          });
+        }
+      });
+    console.log(" DEBUG END: getRoomByDeviceID");
+  } catch (e) {
+    console.error(" CATCH: getRoomByDeviceID : user error > " + e);
+    return res.send({ success: false, message: e.message });
+  }
+};
+
 exports.getRoomByID = async (req, res) => {
   try {
     console.log(" DEBUG START: getRoomByID ");
