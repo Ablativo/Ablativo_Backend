@@ -206,7 +206,7 @@ exports.endVisit = (req, res) => {
               });
               // Save Music
               const writer = new MidiWriter.Writer(track);
-              writer.saveMIDI("./music/"+req.body.visitID+"_"+req.decoded._id+".mid");
+              writer.saveMIDI("./music/"+req.body.visitID+"_"+req.decoded._id);
               console.log("Done: MUSIC GENERATED !!!");
             })
             .then(() => {
