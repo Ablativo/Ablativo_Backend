@@ -8,9 +8,11 @@ module.exports = function (app) {
     // and therefore needs a different path 
     app.get('/dashapi/room/getRoomList', room.getRoomList);                // get room list                                                       
     app.get('/dashapi/room/getRoomByID', room.getRoomByID);                // get room by id
+    app.get('/dashapi/room/getRoomByDeviceID', room.getRoomByDeviceID);    // get room by device id
 
     app.post('/dashapi/room/createRoom', room.createRoom);                 //create room
     app.post('/dashapi/room/createArtwork', room.createArtwork);           //create artwork
     app.post('/api/room/upvoteArtwork', room.upvoteArtwork);               //upvote artwork
     app.post('/api/room/upvoteRoom', room.upvoteRoom)                      //upvote room
+
 };
